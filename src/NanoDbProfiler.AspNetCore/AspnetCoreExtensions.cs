@@ -11,7 +11,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
         public static IServiceCollection AddQueryLog (this IServiceCollection services) {
 
-            services.AddSingleton<EfCoreMetrics>();
+            services.AddScoped<EfCoreMetrics>();
 
 
             var h = new Harmony("id");
@@ -53,9 +53,8 @@ namespace Microsoft.Extensions.DependencyInjection
             h.Patch(d.Single(x => x.Name == "CommandScalarExecutedAsync"), new HarmonyMethod(GetHook(nameof(Hooks.CommandScalarExecutedAsync))));
             h.Patch(d.Single(x => x.Name == "CommandNonQueryExecutedAsync"), new HarmonyMethod(GetHook(nameof(Hooks.CommandNonQueryExecutedAsync))));
 
+#if false
             var relationCommandType = efCoreRelationalTypes.Single(x => x.Name == "RelationalCommand");
-
-
             var methods = relationCommandType.GetMethods(AccessTools.all);
             var original = methods.Single(x => x.Name == "ExecuteReader");
             var prefix = typeof(Hooks).GetMethod(nameof(Hooks.ExecuteReaderPrefix));
@@ -63,6 +62,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             h.Patch(original, prefix: new HarmonyMethod(prefix), postfix: new HarmonyMethod(postfix));
 
+#endif
             #endregion
 
             return services;

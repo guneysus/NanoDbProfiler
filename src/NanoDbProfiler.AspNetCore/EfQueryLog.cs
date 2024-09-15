@@ -1,21 +1,4 @@
-﻿
-using System.Runtime.CompilerServices;
-
-namespace Microsoft.Extensions.DependencyInjection;
-
-public class EfCoreMetrics
-{
-    public int Id => RuntimeHelpers.GetHashCode(this);
-
-    public ConcurrentDictionary<string, ConcurrentBag<double>> Data = new();
-
-    public void Add (Metric metric) {
-        var item = Data.GetOrAdd(metric.Query.Trim(), new ConcurrentBag<double>());
-        item.Add(metric.Duration);
-    }
-
-    public void Clear () => Data.Clear();
-}
+﻿namespace Microsoft.Extensions.DependencyInjection;
 
 
 public static class EfQueryLog
@@ -23,7 +6,6 @@ public static class EfQueryLog
     public static WebApplication App;
 
     public static EfCoreMetrics GetMetricsDb () {
-        //var scope = App.Services.CreateScope();
         try {
             EfCoreMetrics metrics = App.Services.GetRequiredService<EfCoreMetrics>();
             return metrics;

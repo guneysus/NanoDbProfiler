@@ -54,6 +54,9 @@ public class QueryLogMiddleware
         <span style=""font-size: 16px; font-weight: 500;"">NanoDBProfiler Toolbar</span>
     </div>
     <div id=""debug-content"" style=""display: none; background-color: #444; height: 0; overflow: hidden; transition: height 0.3s;"">
+        <div>
+            <a style=""color:white;"" target=""_blank"" href=""/query-log"">Open in newtab</a>
+        </div>
         <iframe src=""/query-log"" style=""width: 100%; height: 100%; border: none; overflow: auto;""></iframe>
     </div>
 </div>
