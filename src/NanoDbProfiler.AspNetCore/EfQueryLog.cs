@@ -14,31 +14,33 @@ public static class EfQueryLog
         return new DashboardData(_metrics);
     }
 
-    public static IEndpointConventionBuilder UseQueryDashboard (this IEndpointRouteBuilder app,
+    public static WebApplication UseQueryDashboard (this WebApplication app,
         string route = "query-log") {
         //app.MapGet($"{route}/json", () => );
 
-        RouteHandlerBuilder routeHandlerBuilder =
-            app.MapGet("{route}", (HttpRequest h) => {
-                MediaTypeHeaderValue.TryParseList(h.Headers["Accept"], out var accept);
+        app.MapGet(route, (HttpRequest h) => {
+            MediaTypeHeaderValue.TryParseList(h.Headers["Accept"], out var accept);
 
-                IResult resp = accept switch {
-                    null => TextResult(),
-                    var a when a.Any(x => x.MatchesMediaType("text/html")) => HtmlResult(),
-                    var a when a.Any(x => x.MatchesMediaType("text/plain")) => TextResult(),
-                    var a when a.Any(x => x.MatchesMediaType("application/json")) => JsonResult(),
-                    _ => TextResult()
-                };
+            IResult resp = accept switch {
+                null => TextResult(),
+                var a when a.Any(x => x.MatchesMediaType("text/html")) => HtmlResult(),
+                var a when a.Any(x => x.MatchesMediaType("text/plain")) => TextResult(),
+                var a when a.Any(x => x.MatchesMediaType("application/json")) => JsonResult(),
+                _ => TextResult()
+            };
 
-                return resp;
-            });
+            return resp;
+        });
 
         app.MapDelete(route, (HttpRequest h) => {
             EfQueryLog.Clear();
             return Results.NoContent();
         });
 
-        return routeHandlerBuilder;
+
+        app.UseMiddleware<QueryLogMiddleware>();
+
+        return app;
     }
 
     private static IResult HtmlResult () {
