@@ -12,8 +12,16 @@ namespace Example
                 .AddNanoDbProfiler();
 
             var app = builder.Build();
-            
-            app.MapGet("/",  (HttpContext h, [FromServices] TodoContext db) => {
+
+            app.MapGet("/", (HttpContext h, [FromServices] TodoContext db) => {
+                var e = new Todo{ Title = Guid.NewGuid().ToString() };
+                db.Todos.Add(e);
+                db.SaveChanges();
+                e.Title = Guid.NewGuid().ToString();
+                db.SaveChanges();
+                db.Remove(e);
+                db.SaveChanges();
+
                 var todos = db.Todos.Take(100).ToList();
                 return Results.Text("Hello World!", "text/html");
             });
@@ -33,4 +41,8 @@ public class TodoContext (DbContextOptions<TodoContext> options) : DbContext(opt
 }
 
 
-public record class Todo(int Id, string Title);
+public class Todo
+{
+    public int Id { get; set; }
+    public string Title { get; set; }
+};

@@ -11,10 +11,8 @@ namespace Microsoft.Extensions.DependencyInjection
 
         public static IServiceCollection AddNanoDbProfiler (this IServiceCollection services) {
 
-            AppDomain.CurrentDomain.Load("Microsoft.EntityFrameworkCore.Relational");
-
-            Assembly.Load("Microsoft.EntityFrameworkCore.Relational");
-            AppDomain.CurrentDomain.Load(new AssemblyName("Microsoft.EntityFrameworkCore.Relational"));
+            _ = AppDomain.CurrentDomain.Load("Microsoft.EntityFrameworkCore.Relational");
+            //_ = Assembly.Load("Microsoft.EntityFrameworkCore.Relational");
 
             services.AddSingleton<EfCoreMetrics>();
 
@@ -40,8 +38,10 @@ namespace Microsoft.Extensions.DependencyInjection
             Assembly.Load("Microsoft.EntityFrameworkCore.Relational");
 
             var efCoreRelationAsm = assemblies.FirstOrDefault(x => x.GetName().Name == "Microsoft.EntityFrameworkCore.Relational");
-            if (efCoreRelationAsm == null)
+            if (efCoreRelationAsm == null) {
+                throw new Exception("Something is wrong");
                 return services;
+            }
 
             Type[] efCoreRelationalTypes = efCoreRelationAsm.GetTypes();
             var diagnosticsLogger = efCoreRelationalTypes.Single(x => x.FullName == "Microsoft.EntityFrameworkCore.Diagnostics.Internal.RelationalCommandDiagnosticsLogger");
