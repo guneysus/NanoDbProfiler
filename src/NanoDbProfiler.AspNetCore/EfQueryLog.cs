@@ -26,6 +26,7 @@ public static class EfQueryLog
             IResult resp = accept switch
             {
                 null => TextResult(),
+                var a when a.Any(x => x.MatchesMediaType("text/html")) => HtmlResult(),
                 var a when a.Any(x => x.MatchesMediaType("text/plain")) => TextResult(),
                 var a when a.Any(x => x.MatchesMediaType("application/json")) => JsonResult(),
                 _ => TextResult()
@@ -35,6 +36,77 @@ public static class EfQueryLog
         });
 
         return routeHandlerBuilder;
+    }
+
+    private static IResult HtmlResult () {
+        var htmlBuilder = new StringBuilder();
+
+        htmlBuilder.Append(@"<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>EF Core DB Profiler</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f9;
+        }
+        .metric-card {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .metric-title {
+            font-size: 18px;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        .metric-details {
+            font-size: 14px;
+            color: #666;
+        }
+        .metric-query {
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-family: monospace;
+            white-space: pre-wrap;
+            margin-top: 10px;
+            border: 1px solid #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>EF Core DB Profiler</h1>
+    <div id='metrics-container'>");
+
+        var s = new DashboardData(_metrics);
+
+
+        foreach (var summary in s.Summaries) {
+            htmlBuilder.Append($@"
+        <div class='metric-card'>
+            <div class='metric-title'>P95: {summary.P95}ms, Total: {summary.Total}</div>
+            <div class='metric-query'>{summary.Query}</div>
+        </div>");
+        }
+
+        htmlBuilder.Append(@"
+    </div>
+
+</body>
+</html>");
+
+        return Results.Text(htmlBuilder.ToString(), "text/html");
     }
 
     private static IResult JsonResult()
