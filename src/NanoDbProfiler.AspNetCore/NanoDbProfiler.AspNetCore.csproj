@@ -10,8 +10,8 @@
         <IsPackable>true</IsPackable>
         <Title>Entity Framework Core Profiler for ASP.Net Core web apps</Title>
         <PackageReadmeFile>README.md</PackageReadmeFile>
-        <PackageProjectUrl>https://github.com/guneysus/ef-core-query-log-for-aspnetcore</PackageProjectUrl>
-        <RepositoryUrl>https://github.com/guneysus/ef-core-query-log-for-aspnetcore</RepositoryUrl>
+        <PackageProjectUrl>https://github.com/guneysus/NanoDbProfiler</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/guneysus/NanoDbProfiler</RepositoryUrl>
         <PackageTags>efcore; profiler; aspnetcore</PackageTags>
         <IncludeSymbols>False</IncludeSymbols>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
