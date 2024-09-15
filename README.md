@@ -1,27 +1,31 @@
 # Entity Framework Profiler for ASP.Net Core
 
+A tiny profiler without hassle. 
+![screenshot](./docs/img/chrome_qKlLJE0ANE.png)
 
 ## Installation
 
 ```
-dotnet add package NanoDbProfiler.AspNetCore --version 0.1.1-alpha-gc649544dfb --source https://www.myget.org/F/guneysu/api/v3/index.json
+dotnet add package NanoDbProfiler.AspNetCore --version 0.1.11-alpha-g61f85a4952 --source https://www.myget.org/F/guneysu/api/v3/index.json 
 ```
 
 ```csharp
 // Configure service
-services.AddQueryLog();
+services.AddNanoDbProfiler();
 
 
 // Configure App
-app.UseQueryDashboard();
+app.UseNanodbProfilerToolbar();
 ```
 
 
 ## Usage
 
+- Toolbar will inject itself any html page.
+- This project started with EF Core 8.x, it did not tested over old EF Core versions.
+  
 
 ### Plain Text Query Dashboard
-
 
 ```http
 GET http://localhost:5287/query-log
