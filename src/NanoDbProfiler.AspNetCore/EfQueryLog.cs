@@ -3,36 +3,39 @@
 public static class EfQueryLog
 {
     static ConcurrentDictionary<string, ConcurrentBag<double>> _metrics = new();
-    public static void AddMetric(Metric metric)
-    {
+    public static void AddMetric (Metric metric) {
         var item = _metrics.GetOrAdd(metric.Query.Trim(), new ConcurrentBag<double>());
         item.Add(metric.Duration);
     }
 
-    static DashboardData GetMetricsSummary()
-    {
+    public static void Clear () => _metrics.Clear();
+
+    static DashboardData GetMetricsSummary () {
         return new DashboardData(_metrics);
     }
 
-    public static IEndpointConventionBuilder UseQueryDashboard(this IEndpointRouteBuilder app,
-        string route = "query-log")
-    {
+    public static IEndpointConventionBuilder UseQueryDashboard (this IEndpointRouteBuilder app,
+        string route = "query-log") {
         //app.MapGet($"{route}/json", () => );
 
-        RouteHandlerBuilder routeHandlerBuilder = app.MapGet("{route}", (HttpRequest h) =>
-        {
-            MediaTypeHeaderValue.TryParseList(h.Headers["Accept"], out var accept);
+        RouteHandlerBuilder routeHandlerBuilder =
+            app.MapGet("{route}", (HttpRequest h) => {
+                MediaTypeHeaderValue.TryParseList(h.Headers["Accept"], out var accept);
 
-            IResult resp = accept switch
-            {
-                null => TextResult(),
-                var a when a.Any(x => x.MatchesMediaType("text/html")) => HtmlResult(),
-                var a when a.Any(x => x.MatchesMediaType("text/plain")) => TextResult(),
-                var a when a.Any(x => x.MatchesMediaType("application/json")) => JsonResult(),
-                _ => TextResult()
-            };
+                IResult resp = accept switch {
+                    null => TextResult(),
+                    var a when a.Any(x => x.MatchesMediaType("text/html")) => HtmlResult(),
+                    var a when a.Any(x => x.MatchesMediaType("text/plain")) => TextResult(),
+                    var a when a.Any(x => x.MatchesMediaType("application/json")) => JsonResult(),
+                    _ => TextResult()
+                };
 
-            return resp;
+                return resp;
+            });
+
+        app.MapDelete(route, (HttpRequest h) => {
+            EfQueryLog.Clear();
+            return Results.NoContent();
         });
 
         return routeHandlerBuilder;
@@ -109,19 +112,16 @@ public static class EfQueryLog
         return Results.Text(htmlBuilder.ToString(), "text/html");
     }
 
-    private static IResult JsonResult()
-    {
+    private static IResult JsonResult () {
         return Results.Json(GetMetricsSummary());
     }
 
-    private static IResult TextResult()
-    {
+    private static IResult TextResult () {
         var sb = new StringBuilder();
 
         var summary = new DashboardData(_metrics);
 
-        foreach (var item in summary.Summaries)
-        {
+        foreach (var item in summary.Summaries) {
             sb
                 .AppendFormat(@"P95: ""{0}ms"" Total: {1}", item.P95, item.Total)
                 .AppendLine().AppendLine("-")
@@ -134,14 +134,12 @@ public static class EfQueryLog
         return Results.Text(plainText);
     }
 
-    public static IServiceCollection AddQueryLog(this IServiceCollection services)
-    {
+    public static IServiceCollection AddQueryLog (this IServiceCollection services) {
         EfQueryLog.UseSqlQueryLogDashboard();
         return services;
     }
 
-    static void UseSqlQueryLogDashboard()
-    {
+    static void UseSqlQueryLogDashboard () {
         var h = new Harmony("id");
 
         #region Hooking
