@@ -1,49 +1,42 @@
-﻿namespace Microsoft.Extensions.DependencyInjection;
+﻿
+namespace Microsoft.Extensions.DependencyInjection;
 
-public static class EfQueryLog
+public class EfCoreMetrics
 {
-    static ConcurrentDictionary<string, ConcurrentBag<double>> _metrics = new();
-    public static void AddMetric (Metric metric) {
-        var item = _metrics.GetOrAdd(metric.Query.Trim(), new ConcurrentBag<double>());
+    public ConcurrentDictionary<string, ConcurrentBag<double>> Data = new();
+
+    public void Add (Metric metric) {
+        var item = Data.GetOrAdd(metric.Query.Trim(), new ConcurrentBag<double>());
         item.Add(metric.Duration);
     }
 
-    public static void Clear () => _metrics.Clear();
+    public void Clear() => Data.Clear();
+}
+
+
+public static class EfQueryLog
+{
+    public static WebApplication App;
+
+    public static EfCoreMetrics GetMetricsDb () {
+        var scope = App.Services.CreateScope();
+        var metrics = scope.ServiceProvider.GetRequiredService<EfCoreMetrics>();
+
+        return metrics;
+    }
+
+    public static void AddMetric (Metric metric) {
+        EfCoreMetrics? metrics = GetMetricsDb();
+        metrics.Add(metric);
+    }
 
     static DashboardData GetMetricsSummary () {
-        return new DashboardData(_metrics);
+        EfCoreMetrics? metrics = GetMetricsDb();
+
+        return new DashboardData(metrics.Data);
     }
 
-    public static WebApplication UseQueryDashboard (this WebApplication app,
-        string route = "query-log") {
-        //app.MapGet($"{route}/json", () => );
-
-        app.MapGet(route, (HttpRequest h) => {
-            MediaTypeHeaderValue.TryParseList(h.Headers["Accept"], out var accept);
-
-            IResult resp = accept switch {
-                null => TextResult(),
-                var a when a.Any(x => x.MatchesMediaType("text/html")) => HtmlResult(),
-                var a when a.Any(x => x.MatchesMediaType("text/plain")) => TextResult(),
-                var a when a.Any(x => x.MatchesMediaType("application/json")) => JsonResult(),
-                _ => TextResult()
-            };
-
-            return resp;
-        });
-
-        app.MapDelete(route, (HttpRequest h) => {
-            EfQueryLog.Clear();
-            return Results.NoContent();
-        });
-
-
-        app.UseMiddleware<QueryLogMiddleware>();
-
-        return app;
-    }
-
-    private static IResult HtmlResult () {
+    internal static IResult HtmlResult (EfCoreMetrics metrics) {
         var htmlBuilder = new StringBuilder();
 
         htmlBuilder.Append(@"<!DOCTYPE html>
@@ -94,7 +87,7 @@ public static class EfQueryLog
     <h1>EF Core DB Profiler</h1>
     <div id='metrics-container'>");
 
-        var s = new DashboardData(_metrics);
+        var s = new DashboardData(metrics.Data);
 
 
         foreach (var summary in s.Summaries) {
@@ -114,14 +107,14 @@ public static class EfQueryLog
         return Results.Text(htmlBuilder.ToString(), "text/html");
     }
 
-    private static IResult JsonResult () {
+    internal static IResult JsonResult (EfCoreMetrics metrics) {
         return Results.Json(GetMetricsSummary());
     }
 
-    private static IResult TextResult () {
+    internal static IResult TextResult (EfCoreMetrics metrics) {
         var sb = new StringBuilder();
 
-        var summary = new DashboardData(_metrics);
+        var summary = new DashboardData(metrics.Data);
 
         foreach (var item in summary.Summaries) {
             sb
@@ -134,65 +127,5 @@ public static class EfQueryLog
 
         string plainText = sb.ToString();
         return Results.Text(plainText);
-    }
-
-    public static IServiceCollection AddQueryLog (this IServiceCollection services) {
-        EfQueryLog.UseSqlQueryLogDashboard();
-        return services;
-    }
-
-    static void UseSqlQueryLogDashboard () {
-        var h = new Harmony("id");
-
-        #region Hooking
-        /* Stub layer
-        * ----------
-        */
-
-        Assembly[] assemblies = AppDomain
-            .CurrentDomain
-            .GetAssemblies();
-
-
-        // {Microsoft.EntityFrameworkCore.Diagnostics.Internal.RelationalCommandDiagnosticsLogger}
-        var diagnosticsLoggerTypes = (from t in assemblies.SelectMany(t => t.GetTypes())
-                                      where t.GetInterfaces().Any(t => t.Name.Contains("IRelationalCommandDiagnosticsLogger"))
-                                      select t).ToList();
-
-        var efCoreRelationAsm = assemblies
-            .Single(x => x.GetName().Name == "Microsoft.EntityFrameworkCore.Relational");
-
-        Type[] efCoreRelationalTypes = efCoreRelationAsm.GetTypes();
-        var diagnosticsLogger = efCoreRelationalTypes.Single(x => x.FullName == "Microsoft.EntityFrameworkCore.Diagnostics.Internal.RelationalCommandDiagnosticsLogger");
-
-        var d = diagnosticsLogger
-            .GetMethods(AccessTools.all)
-            .Where(x => x.Name.Contains("Executed"));
-
-        var genericHook = typeof(Hooks).GetMethod(nameof(Hooks.GenericHook));
-
-        // foreach (var method in diagnosticsLoggerMethods) {
-        //     h.Patch(prefix: new HarmonyMethod(genericHook), original: method);
-        // }
-
-        h.Patch(original: d.Single(x => x.Name == "CommandReaderExecuted"), prefix: new HarmonyMethod(typeof(Hooks).GetMethod(nameof(Hooks.CommandReaderExecuted))));
-        h.Patch(original: d.Single(x => x.Name == "CommandScalarExecuted"), prefix: new HarmonyMethod(typeof(Hooks).GetMethod(nameof(Hooks.CommandScalarExecuted))));
-        h.Patch(original: d.Single(x => x.Name == "CommandNonQueryExecuted"), prefix: new HarmonyMethod(typeof(Hooks).GetMethod(nameof(Hooks.CommandNonQueryExecuted))));
-        h.Patch(original: d.Single(x => x.Name == "CommandReaderExecutedAsync"), prefix: new HarmonyMethod(typeof(Hooks).GetMethod(nameof(Hooks.CommandReaderExecutedAsync))));
-        h.Patch(original: d.Single(x => x.Name == "CommandScalarExecutedAsync"), prefix: new HarmonyMethod(typeof(Hooks).GetMethod(nameof(Hooks.CommandScalarExecutedAsync))));
-        h.Patch(original: d.Single(x => x.Name == "CommandNonQueryExecutedAsync"), prefix: new HarmonyMethod(typeof(Hooks).GetMethod(nameof(Hooks.CommandNonQueryExecutedAsync))));
-
-        var relationCommandType = efCoreRelationalTypes
-            .Single(x => x.Name == "RelationalCommand");
-
-
-        var methods = relationCommandType.GetMethods(AccessTools.all);
-        var original = methods.Single(x => x.Name == "ExecuteReader");
-        var prefix = typeof(Hooks).GetMethod(nameof(Hooks.ExecuteReaderPrefix));
-        var postfix = typeof(Hooks).GetMethod(nameof(Hooks.ExecuteReaderPostfix));
-
-        h.Patch(original, prefix: new HarmonyMethod(prefix), postfix: new HarmonyMethod(postfix));
-
-        #endregion
     }
 }

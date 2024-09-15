@@ -16,7 +16,6 @@ public static class Hooks
     public static void CommandReaderExecuted(object[] __args, TimeSpan duration, object command)
     {
         processLog(duration, command);
-
     }
 
     public static void CommandScalarExecuted(TimeSpan duration, object command)
@@ -33,14 +32,12 @@ public static class Hooks
     public static void CommandReaderExecutedAsync(TimeSpan duration, object command)
     {
         processLog(duration, command);
-
     }
 
 
     public static void CommandScalarExecutedAsync(TimeSpan duration, object command)
     {
         processLog(duration, command);
-
     }
 
     public static void CommandNonQueryExecutedAsync(TimeSpan duration, object command)
