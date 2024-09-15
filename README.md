@@ -22,8 +22,12 @@ app.UseNanodbProfilerToolbar();
 ## Usage
 
 - Toolbar will inject itself any html page.
-- This project started with EF Core 8.x, it did not tested over old EF Core versions.
-  
+
+## Warnings & Disclaimers
+- DO NOT USE ON PRODUCTION SYSTEMS!
+- This project is in very early stage,
+- Started with EF Core 8.x, it did not tested over old EF Core versions
+- There is no benchmark about profiler overhead
 
 ### Plain Text Query Dashboard
 
