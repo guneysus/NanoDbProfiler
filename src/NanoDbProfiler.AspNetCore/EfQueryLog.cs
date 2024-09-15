@@ -1,8 +1,12 @@
 ﻿
+using System.Runtime.CompilerServices;
+
 namespace Microsoft.Extensions.DependencyInjection;
 
 public class EfCoreMetrics
 {
+    public int Id => RuntimeHelpers.GetHashCode(this);
+
     public ConcurrentDictionary<string, ConcurrentBag<double>> Data = new();
 
     public void Add (Metric metric) {
@@ -10,7 +14,7 @@ public class EfCoreMetrics
         item.Add(metric.Duration);
     }
 
-    public void Clear() => Data.Clear();
+    public void Clear () => Data.Clear();
 }
 
 
@@ -19,10 +23,16 @@ public static class EfQueryLog
     public static WebApplication App;
 
     public static EfCoreMetrics GetMetricsDb () {
-        var scope = App.Services.CreateScope();
-        var metrics = scope.ServiceProvider.GetRequiredService<EfCoreMetrics>();
+        //var scope = App.Services.CreateScope();
+        try {
+            EfCoreMetrics metrics = App.Services.GetRequiredService<EfCoreMetrics>();
+            return metrics;
+        } catch (InvalidOperationException) {
+            var scope = App.Services.CreateScope();
+            EfCoreMetrics metrics = scope.ServiceProvider.GetRequiredService<EfCoreMetrics>();
+            return metrics;
+        }
 
-        return metrics;
     }
 
     public static void AddMetric (Metric metric) {
@@ -37,6 +47,7 @@ public static class EfQueryLog
     }
 
     internal static IResult HtmlResult (EfCoreMetrics metrics) {
+
         var htmlBuilder = new StringBuilder();
 
         htmlBuilder.Append(@"<!DOCTYPE html>
@@ -45,7 +56,7 @@ public static class EfQueryLog
     <meta charset='UTF-8'>
     <meta http-equiv='X-UA-Compatible' content='IE=edge'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-    <title>EF Core DB Profiler</title>
+    <title>NanoDbProfiler for Entity Framework Core</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -80,11 +91,37 @@ public static class EfQueryLog
             margin-top: 10px;
             border: 1px solid #e0e0e0;
         }
+
+/* Global Scrollbar Styling for Webkit (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+    width: 12px; /* Width of the scrollbar */
+    height: 12px; /* Height for horizontal scrollbars */
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1; /* Background of the track */
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #888; /* Color of the scroll thumb */
+    border-radius: 10px; /* Rounded corners */
+    border: 2px solid #f1f1f1; /* Adds spacing between thumb and track */
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: #555; /* Darker color on hover */
+}
+
+/* Global Scrollbar Styling for Firefox */
+* {
+    scrollbar-width: thin; /* Makes the scrollbar thinner */
+    scrollbar-color: #888 #f1f1f1; /* Color of thumb and track */
+}
+
+
     </style>
 </head>
 <body>
-
-    <h1>EF Core DB Profiler</h1>
     <div id='metrics-container'>");
 
         var s = new DashboardData(metrics.Data);

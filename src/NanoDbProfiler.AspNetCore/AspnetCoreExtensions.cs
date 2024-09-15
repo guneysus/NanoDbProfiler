@@ -13,6 +13,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.AddSingleton<EfCoreMetrics>();
 
+
             var h = new Harmony("id");
 
             #region Hooking

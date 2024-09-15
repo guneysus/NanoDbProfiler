@@ -1,4 +1,6 @@
-﻿namespace Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.AspNetCore.Mvc;
+
+namespace Microsoft.Extensions.DependencyInjection;
 
 public class QueryLogMiddleware
 {
@@ -10,6 +12,7 @@ public class QueryLogMiddleware
 
     public async Task InvokeAsync (HttpContext context) {
         var path = context.Request.Path;
+
         if (path == "/query-log") {
             await _next(context);
             return;
@@ -41,19 +44,22 @@ public class QueryLogMiddleware
 
     private string GetDebugToolbarHtml () {
         // Define the toolbar's HTML content
+
         return @"
-<div id=""debug-toolbar"" style=""position: fixed; bottom: 0; left: 0; right: 0; height: 40px; background-color: #333; color: white; z-index: 9999; transition: height 0.3s;"">
-    <div style=""padding: 10px; display: flex; justify-content: space-between;"">
-        <span>Debug Toolbar</span>
-        <button id=""toggle-toolbar"" style=""color: white; background: none; border: none; cursor: pointer;"">Expand</button>
+<!-- Load the Roboto font from Google Fonts -->
+<link href=""https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap"" rel=""stylesheet"">
+
+<div id=""debug-toolbar"" style=""position: fixed; bottom: 0; left: 0; right: 0; height: 40px; background-color: #333; color: white; z-index: 9999; transition: height 0.3s; font-family: 'Roboto', sans-serif;"">
+    <div id=""toolbar-header"" style=""padding: 10px; display: flex; justify-content: space-between; cursor: pointer;"">
+        <span style=""font-size: 16px; font-weight: 500;"">NanoDBProfiler Toolbar</span>
     </div>
     <div id=""debug-content"" style=""display: none; background-color: #444; height: 0; overflow: hidden; transition: height 0.3s;"">
-        <iframe src=""/query-log"" style=""width: 100%; height: 100%; border: none;""></iframe>
+        <iframe src=""/query-log"" style=""width: 100%; height: 100%; border: none; overflow: auto;""></iframe>
     </div>
 </div>
 
 <script>
-    document.getElementById('toggle-toolbar').addEventListener('click', function() {
+    document.getElementById('toolbar-header').addEventListener('click', function() {
         var content = document.getElementById('debug-content');
         var toolbar = document.getElementById('debug-toolbar');
         
@@ -62,16 +68,15 @@ public class QueryLogMiddleware
             content.style.display = 'block';
             content.style.height = '300px'; // Set the desired height
             toolbar.style.height = '340px'; // Adjust the toolbar height accordingly
-            this.innerText = 'Collapse';
         } else {
             // Collapse the toolbar
             content.style.height = '0';
             setTimeout(() => content.style.display = 'none', 300); // Wait for the transition to complete
             toolbar.style.height = '40px'; // Reset the toolbar height
-            this.innerText = 'Expand';
         }
     });
 </script>
+
 ";
     }
 
