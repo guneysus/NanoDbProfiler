@@ -1,0 +1,13 @@
+﻿global using HarmonyLib;
+global using System.Reflection;
+global using System;
+global using System.Collections.Generic;
+global using System.Text;
+global using System.Linq;
+global using System.Collections.Concurrent;
+global using Microsoft.AspNetCore.Builder;
+global using Microsoft.AspNetCore.Http;
+global using Microsoft.AspNetCore.Routing;
+global using System.Diagnostics;
+global using Microsoft.Net.Http.Headers;
+global using NanoDbProfiler.AspNetCore;

@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <PackageId>NanoDbProfiler.AspNetCore</PackageId>
+        <Version>$(GitVersion_NuGetVersion)</Version>
+        <Authors>Ahmed Guneysu</Authors>
+        <Description>EF Core Profiling for ASP.Net Core</Description>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <OutputType>Library</OutputType>
+        <IsPackable>true</IsPackable>
+        <Title>Entity Framework Core Profiler for ASP.Net Core web apps</Title>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageProjectUrl>https://github.com/guneysus/ef-core-query-log-for-aspnetcore</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/guneysus/ef-core-query-log-for-aspnetcore</RepositoryUrl>
+        <PackageTags>efcore; profiler; aspnetcore</PackageTags>
+        <IncludeSymbols>False</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="..\..\README.md">
+            <Pack>True</Pack>
+            <PackagePath>\</PackagePath>
+        </None>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Lib.Harmony" Version="2.3.3" />
+    </ItemGroup>
+</Project>
