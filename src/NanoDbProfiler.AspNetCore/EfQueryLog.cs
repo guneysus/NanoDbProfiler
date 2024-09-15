@@ -6,6 +6,9 @@ public static class EfQueryLog
     public static WebApplication App;
 
     public static EfCoreMetrics GetMetricsDb () {
+        if (App == null)
+            return new EfCoreMetrics();
+
         try {
             EfCoreMetrics metrics = App.Services.GetRequiredService<EfCoreMetrics>();
             return metrics;
@@ -14,7 +17,6 @@ public static class EfQueryLog
             EfCoreMetrics metrics = scope.ServiceProvider.GetRequiredService<EfCoreMetrics>();
             return metrics;
         }
-
     }
 
     public static void AddMetric (Metric metric) {

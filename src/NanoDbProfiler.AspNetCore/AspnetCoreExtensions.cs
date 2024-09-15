@@ -9,9 +9,14 @@ namespace Microsoft.Extensions.DependencyInjection
             return typeof(Hooks).GetMethod(name);
         }
 
-        public static IServiceCollection AddQueryLog (this IServiceCollection services) {
+        public static IServiceCollection AddNanoDbProfiler (this IServiceCollection services) {
 
-            services.AddScoped<EfCoreMetrics>();
+            AppDomain.CurrentDomain.Load("Microsoft.EntityFrameworkCore.Relational");
+
+            Assembly.Load("Microsoft.EntityFrameworkCore.Relational");
+            AppDomain.CurrentDomain.Load(new AssemblyName("Microsoft.EntityFrameworkCore.Relational"));
+
+            services.AddSingleton<EfCoreMetrics>();
 
 
             var h = new Harmony("id");
@@ -30,8 +35,13 @@ namespace Microsoft.Extensions.DependencyInjection
                                           where t.GetInterfaces().Any(t => t.Name.Contains("IRelationalCommandDiagnosticsLogger"))
                                           select t).ToList();
 
-            var efCoreRelationAsm = assemblies
-            .Single(x => x.GetName().Name == "Microsoft.EntityFrameworkCore.Relational");
+            AppDomain.CurrentDomain.Load("Microsoft.EntityFrameworkCore.Relational");
+
+            Assembly.Load("Microsoft.EntityFrameworkCore.Relational");
+
+            var efCoreRelationAsm = assemblies.FirstOrDefault(x => x.GetName().Name == "Microsoft.EntityFrameworkCore.Relational");
+            if (efCoreRelationAsm == null)
+                return services;
 
             Type[] efCoreRelationalTypes = efCoreRelationAsm.GetTypes();
             var diagnosticsLogger = efCoreRelationalTypes.Single(x => x.FullName == "Microsoft.EntityFrameworkCore.Diagnostics.Internal.RelationalCommandDiagnosticsLogger");
@@ -53,25 +63,23 @@ namespace Microsoft.Extensions.DependencyInjection
             h.Patch(d.Single(x => x.Name == "CommandScalarExecutedAsync"), new HarmonyMethod(GetHook(nameof(Hooks.CommandScalarExecutedAsync))));
             h.Patch(d.Single(x => x.Name == "CommandNonQueryExecutedAsync"), new HarmonyMethod(GetHook(nameof(Hooks.CommandNonQueryExecutedAsync))));
 
-#if false
             var relationCommandType = efCoreRelationalTypes.Single(x => x.Name == "RelationalCommand");
             var methods = relationCommandType.GetMethods(AccessTools.all);
             var original = methods.Single(x => x.Name == "ExecuteReader");
-            var prefix = typeof(Hooks).GetMethod(nameof(Hooks.ExecuteReaderPrefix));
-            var postfix = typeof(Hooks).GetMethod(nameof(Hooks.ExecuteReaderPostfix));
+            var prefix = GetHook(nameof(Hooks.ExecuteReaderPrefix));
+            var postfix = GetHook(nameof(Hooks.ExecuteReaderPostfix));
 
             h.Patch(original, prefix: new HarmonyMethod(prefix), postfix: new HarmonyMethod(postfix));
 
-#endif
             #endregion
 
             return services;
         }
 
-        public static WebApplication UseQueryDashboard (this WebApplication app, string route = "query-log") {
+        public static WebApplication UseNanodbProfilerToolbar (this WebApplication app, string route = "query-log") {
 
             EfQueryLog.App = app;
-            app.MapGet(route, ([FromServices]EfCoreMetrics metrics, HttpRequest h) => {
+            app.MapGet(route, ([FromServices] EfCoreMetrics metrics, HttpRequest h) => {
                 MediaTypeHeaderValue.TryParseList(h.Headers["Accept"], out var accept);
 
                 IResult resp = accept switch {
@@ -85,7 +93,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 return resp;
             });
 
-            app.MapDelete(route, ([FromServices]EfCoreMetrics metrics, HttpRequest h) => {
+            app.MapDelete(route, ([FromServices] EfCoreMetrics metrics, HttpRequest h) => {
                 metrics.Clear();
                 return Results.NoContent();
             });
