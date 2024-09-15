@@ -21,4 +21,4 @@ app.UseNanodbProfilerToolbar();
 
 Toolbar will inject itself any html page.
 
-![screenshot](./docs/img/chrome_qKlLJE0ANE.png)
+![screenshot](./img/chrome_qKlLJE0ANE.png)
