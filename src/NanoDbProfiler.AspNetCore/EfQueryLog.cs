@@ -132,12 +132,20 @@ public static class EfQueryLog
         return Results.Json(GetMetricsSummary());
     }
 
-    internal static IResult TextResult (EfCoreMetrics metrics) {
-        var sb = new StringBuilder();
-
+    internal static IResult TextResult (EfCoreMetrics metrics)
+    {
         var summary = new DashboardData(metrics.Data);
 
-        foreach (var item in summary.Summaries) {
+        string plainText = TextRepr(summary);
+        return Results.Text(plainText);
+    }
+
+    public static string TextRepr(DashboardData summary)
+    {
+        var sb = new StringBuilder();
+
+        foreach (var item in summary.Summaries)
+        {
             sb
                 .AppendFormat(@"P95: ""{0}ms"" Total: {1}", item.P95, item.Total)
                 .AppendLine().AppendLine("-")
@@ -147,6 +155,6 @@ public static class EfQueryLog
         }
 
         string plainText = sb.ToString();
-        return Results.Text(plainText);
+        return plainText;
     }
 }
