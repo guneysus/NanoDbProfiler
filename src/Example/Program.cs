@@ -1,8 +1,5 @@
-using System.Linq;
-
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Example
 {
@@ -16,6 +13,15 @@ namespace Example
                 .AddNanoDbProfiler();
 
             var app = builder.Build();
+
+            app.MapGet("/", async (HttpContext h, [FromServices] TodoContext db) =>
+            {
+                await db.Database.EnsureCreatedAsync();
+                return Results.Text("Hello World!", "text/html");
+            });
+
+
+
 
             app.MapGet("/insert", (HttpContext h, [FromServices] TodoContext db) =>
             {
@@ -55,10 +61,6 @@ namespace Example
                 await db.Todos.ExecuteDeleteAsync();
                 return Results.Ok();
             });
-
-            app.MapGet("/", (HttpContext h) => Results.Text("Hello World!", "text/html"));
-
-            app.Services.CreateScope().ServiceProvider.GetRequiredService<TodoContext>().Database.EnsureCreated();
 
             app.UseNanodbProfilerToolbar();
 

@@ -1,5 +1,4 @@
 using System.Net.Http.Json;
-using System.Text.Json;
 
 using Example;
 
@@ -73,7 +72,7 @@ RETURNING 1;")]
 
         // Act
         _ = await client.GetAsync(url);
-        _ = await client.GetAsync("/");
+        //_ = await client.GetAsync("/");
 
         // Assert
         var response = await client.GetAsync("/query-log");

@@ -5,32 +5,51 @@ public static class EfQueryLog
 {
     public static WebApplication App;
 
-    public static EfCoreMetrics GetMetricsDb () {
+    public static IServiceScopeFactory? IServiceScopeFactory { get; internal set; }
+
+    public static EfCoreMetrics GetMetricsDb()
+    {
+        if (IServiceScopeFactory == null)
+            throw new Exception();
+
+        //ArgumentNullException.ThrowIfNull(IServiceScopeFactory);
+        //ArgumentNullException.ThrowIfNull(App);
+
         if (App == null)
             return new EfCoreMetrics();
 
-        try {
-            EfCoreMetrics metrics = App.Services.GetRequiredService<EfCoreMetrics>();
-            return metrics;
-        } catch (InvalidOperationException) {
-            var scope = App.Services.CreateScope();
+        var serviceScopeFactory = App.Services.GetService<IServiceScopeFactory>();
+
+        try
+        {
+            using var scope = IServiceScopeFactory.CreateScope();
             EfCoreMetrics metrics = scope.ServiceProvider.GetRequiredService<EfCoreMetrics>();
+            return metrics;
+        }
+        catch (InvalidOperationException)
+        {
+            throw;
+            using var scope = App.Services.CreateScope();
+            EfCoreMetrics metrics = scope.ServiceProvider.GetService<EfCoreMetrics>();
             return metrics;
         }
     }
 
-    public static void AddMetric (Metric metric) {
+    public static void AddMetric(Metric metric)
+    {
         EfCoreMetrics? metrics = GetMetricsDb();
         metrics.Add(metric);
     }
 
-    static DashboardData GetMetricsSummary () {
+    static DashboardData GetMetricsSummary()
+    {
         EfCoreMetrics? metrics = GetMetricsDb();
 
         return new DashboardData(metrics.Data);
     }
 
-    internal static IResult HtmlResult (EfCoreMetrics metrics) {
+    internal static IResult HtmlResult(EfCoreMetrics metrics)
+    {
 
         var htmlBuilder = new StringBuilder();
 
@@ -111,7 +130,8 @@ public static class EfQueryLog
         var s = new DashboardData(metrics.Data);
 
 
-        foreach (var summary in s.Summaries) {
+        foreach (var summary in s.Summaries)
+        {
             htmlBuilder.Append($@"
         <div class='metric-card'>
             <div class='metric-title'>P95: {summary.P95}ms, Total: {summary.Total}</div>
@@ -128,11 +148,12 @@ public static class EfQueryLog
         return Results.Text(htmlBuilder.ToString(), "text/html");
     }
 
-    internal static IResult JsonResult (EfCoreMetrics metrics) {
+    internal static IResult JsonResult(EfCoreMetrics metrics)
+    {
         return Results.Json(GetMetricsSummary());
     }
 
-    internal static IResult TextResult (EfCoreMetrics metrics)
+    internal static IResult TextResult(EfCoreMetrics metrics)
     {
         var summary = new DashboardData(metrics.Data);
 
