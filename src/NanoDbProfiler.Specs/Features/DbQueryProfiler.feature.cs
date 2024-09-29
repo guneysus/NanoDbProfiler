@@ -109,10 +109,10 @@ this.ScenarioInitialize(scenarioInfo);
             {
                 this.ScenarioStart();
 #line 6
- testRunner.When("/insert", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+    testRunner.When("/insert", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
 #line 7
- testRunner.Then("query should be", "INSERT INTO \"Todos\" (\"Title\")\r\nVALUES (@p0)\r\nRETURNING \"Id\";", ((TechTalk.SpecFlow.Table)(null)), "Then ");
+    testRunner.Then("query should be", "INSERT INTO \"Todos\" (\"Title\")\r\nVALUES (@p0)\r\nRETURNING \"Id\";", ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             }
             this.ScenarioCleanup();
@@ -147,10 +147,10 @@ this.ScenarioInitialize(scenarioInfo);
             {
                 this.ScenarioStart();
 #line 16
- testRunner.When("/update", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+    testRunner.When("/update", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
 #line 17
- testRunner.Then("query should be", "UPDATE \"Todos\" SET \"Title\" = @p0\r\nWHERE \"Id\" = @p1\r\nRETURNING 1;", ((TechTalk.SpecFlow.Table)(null)), "Then ");
+    testRunner.Then("query should be", "UPDATE \"Todos\" SET \"Title\" = @p0\r\nWHERE \"Id\" = @p1\r\nRETURNING 1;", ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             }
             this.ScenarioCleanup();
@@ -185,10 +185,10 @@ this.ScenarioInitialize(scenarioInfo);
             {
                 this.ScenarioStart();
 #line 25
- testRunner.When("/select/scalar", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+    testRunner.When("/select/scalar", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
 #line 26
- testRunner.Then("query should be", "SELECT \"t\".\"Id\"\r\nFROM \"Todos\" AS \"t\"", ((TechTalk.SpecFlow.Table)(null)), "Then ");
+    testRunner.Then("query should be", "SELECT \"t\".\"Id\"\r\nFROM \"Todos\" AS \"t\"", ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             }
             this.ScenarioCleanup();
@@ -223,10 +223,10 @@ this.ScenarioInitialize(scenarioInfo);
             {
                 this.ScenarioStart();
 #line 33
- testRunner.When("/select/single/1", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+    testRunner.When("/select/single/1", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
 #line 34
- testRunner.Then("query should be", "SELECT \"t\".\"Id\", \"t\".\"Title\"\r\nFROM \"Todos\" AS \"t\"\r\nLIMIT 1", ((TechTalk.SpecFlow.Table)(null)), "Then ");
+    testRunner.Then("query should be", "SELECT \"t\".\"Id\", \"t\".\"Title\"\r\nFROM \"Todos\" AS \"t\"\r\nLIMIT 1", ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             }
             this.ScenarioCleanup();
@@ -261,10 +261,10 @@ this.ScenarioInitialize(scenarioInfo);
             {
                 this.ScenarioStart();
 #line 42
- testRunner.When("/select/single/2", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+    testRunner.When("/select/single/2", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
 #line 43
- testRunner.Then("query should be", "SELECT \"t\".\"Id\", \"t\".\"Title\"\r\nFROM \"Todos\" AS \"t\"\r\nLIMIT 1 OFFSET @__p_0", ((TechTalk.SpecFlow.Table)(null)), "Then ");
+    testRunner.Then("query should be", "SELECT \"t\".\"Id\", \"t\".\"Title\"\r\nFROM \"Todos\" AS \"t\"\r\nLIMIT 1 OFFSET @__p_0", ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             }
             this.ScenarioCleanup();
@@ -299,10 +299,10 @@ this.ScenarioInitialize(scenarioInfo);
             {
                 this.ScenarioStart();
 #line 51
- testRunner.When("/select/all", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+    testRunner.When("/select/all", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
 #line 52
- testRunner.Then("query should be", "SELECT \"t\".\"Id\", \"t\".\"Title\"\r\nFROM \"Todos\" AS \"t\"", ((TechTalk.SpecFlow.Table)(null)), "Then ");
+    testRunner.Then("query should be", "SELECT \"t\".\"Id\", \"t\".\"Title\"\r\nFROM \"Todos\" AS \"t\"", ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             }
             this.ScenarioCleanup();
@@ -337,10 +337,10 @@ this.ScenarioInitialize(scenarioInfo);
             {
                 this.ScenarioStart();
 #line 60
- testRunner.When("/delete/single", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+    testRunner.When("/delete/single", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
 #line 61
- testRunner.Then("query should be", "DELETE FROM \"Todos\"\r\nWHERE \"Id\" = @p0\r\nRETURNING 1;", ((TechTalk.SpecFlow.Table)(null)), "Then ");
+    testRunner.Then("query should be", "DELETE FROM \"Todos\"\r\nWHERE \"Id\" = @p0\r\nRETURNING 1;", ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             }
             this.ScenarioCleanup();
@@ -375,10 +375,10 @@ this.ScenarioInitialize(scenarioInfo);
             {
                 this.ScenarioStart();
 #line 69
- testRunner.When("/delete/all", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+    testRunner.When("/delete/all", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
 #line 70
- testRunner.Then("query should be", "DELETE FROM \"Todos\" AS \"t\"", ((TechTalk.SpecFlow.Table)(null)), "Then ");
+    testRunner.Then("query should be", "DELETE FROM \"Todos\" AS \"t\"", ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             }
             this.ScenarioCleanup();
