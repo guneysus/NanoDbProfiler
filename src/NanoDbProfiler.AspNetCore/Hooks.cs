@@ -8,11 +8,6 @@ public static class Hooks
         __state.Start();
     }
 
-    public static void GenericHook()
-    {
-
-    }
-
     public static void CommandReaderExecuted(object[] __args, TimeSpan duration, object command)
     {
         processLog(duration, command);

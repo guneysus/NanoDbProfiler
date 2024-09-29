@@ -4,10 +4,12 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class AspnetCoreExtensions
 {
+
     public static IServiceCollection AddNanoDbProfiler(this IServiceCollection s)
     {
         const string EfCoreRelationalAssemblyString = "Microsoft.EntityFrameworkCore.Relational";
         const string DiagnosticLoggerFullname = "Microsoft.EntityFrameworkCore.Diagnostics.Internal.RelationalCommandDiagnosticsLogger";
+        const string DiagnosticLoggerInterfaceName = "IRelationalCommandDiagnosticsLogger";
 
         _ = AppDomain.CurrentDomain.Load(EfCoreRelationalAssemblyString);
         _ = Assembly.Load(EfCoreRelationalAssemblyString);
@@ -22,7 +24,7 @@ public static class AspnetCoreExtensions
 
         var diagnosticsLoggerTypes = (
             from t in assemblies.SelectMany(t => t.GetTypes())
-            where t.GetInterfaces().Any(t => t.Name.Contains("IRelationalCommandDiagnosticsLogger"))
+            where t.GetInterfaces().Any(t => t.Name.Contains(DiagnosticLoggerInterfaceName))
             select t);
 
         var efCoreRelationAsm = (
@@ -39,39 +41,44 @@ public static class AspnetCoreExtensions
 
         MethodInfo [] diagnosticsLoggerMethods = diagnosticsLoggerType.GetMethods(AccessTools.all);
 
-        var d = (
+        var diagnoticLoggerMethods = (
             from m in diagnosticsLoggerMethods
             where m.Name.Contains("Executed")
             select m);
 
-#if ENABLE_GENERIC_HOOKS
-        var genericHook = typeof(Hooks).GetMethod(nameof(Hooks.GenericHook));
-
-        foreach (var method in diagnosticsLoggerMethods)
-        {
-            h.Patch(prefix: new HarmonyMethod(genericHook), original: method);
-        }
-#endif
-
-        patch(h, d, "CommandReaderExecuted");
-        patch(h, d, "CommandScalarExecuted");
-        patch(h, d, "CommandNonQueryExecuted");
-        patch(h, d, "CommandReaderExecutedAsync");
-        patch(h, d, "CommandScalarExecutedAsync");
-        patch(h, d, "CommandNonQueryExecutedAsync");
+        patch("CommandReaderExecuted", nameof(Hooks.CommandReaderExecuted), diagnoticLoggerMethods, h);
+        patch("CommandScalarExecuted", nameof(Hooks.CommandScalarExecuted), diagnoticLoggerMethods, h);
+        patch("CommandNonQueryExecuted", nameof(Hooks.CommandNonQueryExecuted), diagnoticLoggerMethods, h);
+        patch("CommandReaderExecutedAsync", nameof(Hooks.CommandReaderExecutedAsync), diagnoticLoggerMethods, h);
+        patch("CommandScalarExecutedAsync", nameof(Hooks.CommandScalarExecutedAsync), diagnoticLoggerMethods, h);
+        patch("CommandNonQueryExecutedAsync", nameof(Hooks.CommandNonQueryExecutedAsync), diagnoticLoggerMethods, h);
 
         var relationCommandType = efCoreRelationalTypes.Single(x => x.Name == "RelationalCommand");
         var methods = relationCommandType.GetMethods(AccessTools.all);
-        var original = methods.Single(x => x.Name == "ExecuteReader");
-        var prefix = typeof(Hooks).GetMethod(nameof(Hooks.ExecuteReaderPrefix));
-        var postfix = typeof(Hooks).GetMethod(nameof(Hooks.ExecuteReaderPostfix));
 
-        h.Patch(original, prefix: new HarmonyMethod(prefix), postfix: new HarmonyMethod(postfix));
+        patch("ExecuteReader", methods, h,
+            prefix: new HarmonyMethod(typeof(Hooks).GetMethod(nameof(Hooks.ExecuteReaderPrefix))),
+            postfix: new HarmonyMethod(typeof(Hooks).GetMethod(nameof(Hooks.ExecuteReaderPostfix))));
 
         return s;
     }
 
-    private static void patch(Harmony harmony, IEnumerable<MethodInfo> methods, string name) => harmony.Patch(methods.Single(x => x.Name == name), new HarmonyMethod(typeof(Hooks).GetMethod(name)));
+    private static void patch(string name, IEnumerable<MethodInfo> methods, Harmony harmony, HarmonyMethod prefix, HarmonyMethod postfix)
+    {
+        var method = (
+            from m in methods
+            where m.Name == name
+            select m).Single();
+
+        var replacement = harmony.Patch(method, prefix: prefix, postfix: postfix);
+        ArgumentNullException.ThrowIfNull(replacement);
+    }
+
+    private static void patch(string name, string hookName, IEnumerable<MethodInfo> methods, Harmony harmony)
+    {
+        var replacement = harmony.Patch(methods.Single(x => x.Name == name), new HarmonyMethod(typeof(Hooks).GetMethod(name)));
+        ArgumentNullException.ThrowIfNull(replacement);
+    }
 
     public static WebApplication UseNanodbProfilerToolbar(this WebApplication app, string route = "query-log")
     {
@@ -98,7 +105,6 @@ public static class AspnetCoreExtensions
             metrics.Clear();
             return Results.NoContent();
         });
-
 
         app.UseMiddleware<QueryLogMiddleware>();
 
