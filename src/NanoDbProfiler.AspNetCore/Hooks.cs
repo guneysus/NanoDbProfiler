@@ -34,7 +34,6 @@ public static class Hooks
         processLog(duration, command);
     }
 
-
     public static void CommandScalarExecutedAsync(TimeSpan duration, object command)
     {
         processLog(duration, command);

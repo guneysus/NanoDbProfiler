@@ -3,36 +3,14 @@
 
 public static class EfQueryLog
 {
-    public static WebApplication App;
-
-    public static IServiceScopeFactory? IServiceScopeFactory { get; internal set; }
+    public static IServiceScopeFactory? ServiceScopeFactory { get; internal set; }
 
     public static EfCoreMetrics GetMetricsDb()
     {
-        if (IServiceScopeFactory == null)
-            throw new Exception();
-
-        //ArgumentNullException.ThrowIfNull(IServiceScopeFactory);
-        //ArgumentNullException.ThrowIfNull(App);
-
-        if (App == null)
-            return new EfCoreMetrics();
-
-        var serviceScopeFactory = App.Services.GetService<IServiceScopeFactory>();
-
-        try
-        {
-            using var scope = IServiceScopeFactory.CreateScope();
-            EfCoreMetrics metrics = scope.ServiceProvider.GetRequiredService<EfCoreMetrics>();
-            return metrics;
-        }
-        catch (InvalidOperationException)
-        {
-            throw;
-            using var scope = App.Services.CreateScope();
-            EfCoreMetrics metrics = scope.ServiceProvider.GetService<EfCoreMetrics>();
-            return metrics;
-        }
+        ArgumentNullException.ThrowIfNull(ServiceScopeFactory);
+        using var scope = ServiceScopeFactory.CreateScope();
+        EfCoreMetrics metrics = scope.ServiceProvider.GetRequiredService<EfCoreMetrics>();
+        return metrics;
     }
 
     public static void AddMetric(Metric metric)

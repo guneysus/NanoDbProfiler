@@ -82,8 +82,7 @@ public static class AspnetCoreExtensions
     public static WebApplication UseNanodbProfilerToolbar(this WebApplication app, string route = "query-log")
     {
 
-        EfQueryLog.App = app;
-        EfQueryLog.IServiceScopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
+        EfQueryLog.ServiceScopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
 
         app.MapGet(route, ([FromServices] EfCoreMetrics metrics, HttpRequest h) =>
         {
