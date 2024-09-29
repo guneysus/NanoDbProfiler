@@ -25,8 +25,22 @@ public static class Hooks
         Type type = command.GetType();
         PropertyInfo? cmdTextProp = type.GetProperty("CommandText");
 
-        if (cmdTextProp == null) return;
+        if (cmdTextProp == null)
+#if DEBUG
+            throw new ArgumentNullException(nameof(cmdTextProp));
+#else
+            return; 
+#endif
+
         var cmdText = cmdTextProp.GetValue(command) as string;
+
+        if (cmdText == null)
+#if DEBUG
+            throw new ArgumentNullException(nameof(cmdText));
+#else
+            return;
+#endif
+
         var ms = duration.TotalMilliseconds;
 
         var metric = new Metric
@@ -53,7 +67,8 @@ public static class Hooks
         Type type = __instance.GetType();
         PropertyInfo? cmdTextProp = type.GetProperty("CommandText");
 
-        if (cmdTextProp == null) return;
+        if (cmdTextProp == null)
+            return;
         var cmdText = cmdTextProp.GetValue(__instance) as string;
 
 #if ENABLE_PARAMETERS_DICT
