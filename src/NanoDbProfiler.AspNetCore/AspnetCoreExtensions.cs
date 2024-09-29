@@ -4,23 +4,20 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class AspnetCoreExtensions
 {
-
     public static IServiceCollection AddNanoDbProfiler(this IServiceCollection s)
     {
         const string EfCoreRelationalAssemblyString = "Microsoft.EntityFrameworkCore.Relational";
         const string DiagnosticLoggerFullname = "Microsoft.EntityFrameworkCore.Diagnostics.Internal.RelationalCommandDiagnosticsLogger";
         const string DiagnosticLoggerInterfaceName = "IRelationalCommandDiagnosticsLogger";
 
-        _ = AppDomain.CurrentDomain.Load(EfCoreRelationalAssemblyString);
-        _ = Assembly.Load(EfCoreRelationalAssemblyString);
+        var efCoreRelationalAsm = Assembly.Load(EfCoreRelationalAssemblyString);
+        ArgumentNullException.ThrowIfNull(efCoreRelationalAsm);
 
         s.AddSingleton<EfCoreMetrics>();
 
         var h = new Harmony("id");
 
         Assembly [] assemblies = AppDomain.CurrentDomain.GetAssemblies();
-
-        // {Microsoft.EntityFrameworkCore.Diagnostics.Internal.RelationalCommandDiagnosticsLogger}
 
         var diagnosticsLoggerTypes = (
             from t in assemblies.SelectMany(t => t.GetTypes())
@@ -41,17 +38,17 @@ public static class AspnetCoreExtensions
 
         MethodInfo [] diagnosticsLoggerMethods = diagnosticsLoggerType.GetMethods(AccessTools.all);
 
-        var diagnoticLoggerMethods = (
+        var diagLoggerMethods = (
             from m in diagnosticsLoggerMethods
             where m.Name.Contains("Executed")
             select m);
 
-        patch("CommandReaderExecuted", nameof(Hooks.CommandReaderExecuted), diagnoticLoggerMethods, h);
-        patch("CommandScalarExecuted", nameof(Hooks.CommandScalarExecuted), diagnoticLoggerMethods, h);
-        patch("CommandNonQueryExecuted", nameof(Hooks.CommandNonQueryExecuted), diagnoticLoggerMethods, h);
-        patch("CommandReaderExecutedAsync", nameof(Hooks.CommandReaderExecutedAsync), diagnoticLoggerMethods, h);
-        patch("CommandScalarExecutedAsync", nameof(Hooks.CommandScalarExecutedAsync), diagnoticLoggerMethods, h);
-        patch("CommandNonQueryExecutedAsync", nameof(Hooks.CommandNonQueryExecutedAsync), diagnoticLoggerMethods, h);
+        patch("CommandReaderExecuted", nameof(Hooks.CommandReaderExecuted), diagLoggerMethods, h);
+        patch("CommandScalarExecuted", nameof(Hooks.CommandScalarExecuted), diagLoggerMethods, h);
+        patch("CommandNonQueryExecuted", nameof(Hooks.CommandNonQueryExecuted), diagLoggerMethods, h);
+        patch("CommandReaderExecutedAsync", nameof(Hooks.CommandReaderExecutedAsync), diagLoggerMethods, h);
+        patch("CommandScalarExecutedAsync", nameof(Hooks.CommandScalarExecutedAsync), diagLoggerMethods, h);
+        patch("CommandNonQueryExecutedAsync", nameof(Hooks.CommandNonQueryExecutedAsync), diagLoggerMethods, h);
 
         var relationCommandType = efCoreRelationalTypes.Single(x => x.Name == "RelationalCommand");
         var methods = relationCommandType.GetMethods(AccessTools.all);

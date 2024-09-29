@@ -8,36 +8,17 @@ public static class Hooks
         __state.Start();
     }
 
-    public static void CommandReaderExecuted(object[] __args, TimeSpan duration, object command)
-    {
-        processLog(duration, command);
-    }
+    public static void CommandReaderExecuted(object [] __args, TimeSpan duration, object command) => processLog(duration, command);
 
-    public static void CommandScalarExecuted(TimeSpan duration, object command)
-    {
-        processLog(duration, command);
+    public static void CommandScalarExecuted(TimeSpan duration, object command) => processLog(duration, command);
 
-    }
+    public static void CommandNonQueryExecuted(TimeSpan duration, object command) => processLog(duration, command);
 
-    public static void CommandNonQueryExecuted(TimeSpan duration, object command)
-    {
-        processLog(duration, command);
-    }
+    public static void CommandReaderExecutedAsync(TimeSpan duration, object command) => processLog(duration, command);
 
-    public static void CommandReaderExecutedAsync(TimeSpan duration, object command)
-    {
-        processLog(duration, command);
-    }
+    public static void CommandScalarExecutedAsync(TimeSpan duration, object command) => processLog(duration, command);
 
-    public static void CommandScalarExecutedAsync(TimeSpan duration, object command)
-    {
-        processLog(duration, command);
-    }
-
-    public static void CommandNonQueryExecutedAsync(TimeSpan duration, object command)
-    {
-        processLog(duration, command);
-    }
+    public static void CommandNonQueryExecutedAsync(TimeSpan duration, object command) => processLog(duration, command);
 
     private static void processLog(TimeSpan duration, object command)
     {

@@ -37,12 +37,10 @@ public sealed class QueryTestsStepDefinitions : IClassFixture<WebApplicationFact
 
 
     [When(@"executed")]
-    public async Task WhenExecutedAsync()
-    {
+    public async Task WhenExecutedAsync() =>
         // Act
 
         _ = await _client.GetAsync(_url);
-    }
 
 
     [Then(@"profiled query should be")]
