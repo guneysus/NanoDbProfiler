@@ -75,9 +75,14 @@ public static class Hooks
         } 
 #endif
 
-        if (cmdText == null) return;
+        if (cmdText == null)
+#if DEBUG
+            throw new ArgumentNullException(nameof(cmdText));
+#else
+            return; 
+#endif
 
-        var metric = new Metric
+            var metric = new Metric
         {
             Duration = __state.Elapsed.TotalMilliseconds,
             Query = cmdText,
