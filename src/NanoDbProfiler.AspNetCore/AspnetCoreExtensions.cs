@@ -4,84 +4,77 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class AspnetCoreExtensions
 {
-
-    internal static MethodInfo GetHook(string name)
+    public static IServiceCollection AddNanoDbProfiler(this IServiceCollection s)
     {
-        return typeof(Hooks).GetMethod(name);
-    }
+        const string EfCoreRelationalAssemblyString = "Microsoft.EntityFrameworkCore.Relational";
+        const string DiagnosticLoggerFullname = "Microsoft.EntityFrameworkCore.Diagnostics.Internal.RelationalCommandDiagnosticsLogger";
 
-    public static IServiceCollection AddNanoDbProfiler(this IServiceCollection services)
-    {
+        _ = AppDomain.CurrentDomain.Load(EfCoreRelationalAssemblyString);
+        _ = Assembly.Load(EfCoreRelationalAssemblyString);
 
-        _ = AppDomain.CurrentDomain.Load("Microsoft.EntityFrameworkCore.Relational");
-        //_ = Assembly.Load("Microsoft.EntityFrameworkCore.Relational");
-
-        services.AddSingleton<EfCoreMetrics>();
-
+        s.AddSingleton<EfCoreMetrics>();
 
         var h = new Harmony("id");
 
-        #region Hooking
-        /* Stub layer
-        * ----------
-        */
-
-        Assembly [] assemblies = AppDomain
-        .CurrentDomain
-        .GetAssemblies();
+        Assembly [] assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
         // {Microsoft.EntityFrameworkCore.Diagnostics.Internal.RelationalCommandDiagnosticsLogger}
-        var diagnosticsLoggerTypes = (from t in assemblies.SelectMany(t => t.GetTypes())
-                                      where t.GetInterfaces().Any(t => t.Name.Contains("IRelationalCommandDiagnosticsLogger"))
-                                      select t).ToList();
 
-        AppDomain.CurrentDomain.Load("Microsoft.EntityFrameworkCore.Relational");
+        var diagnosticsLoggerTypes = (
+            from t in assemblies.SelectMany(t => t.GetTypes())
+            where t.GetInterfaces().Any(t => t.Name.Contains("IRelationalCommandDiagnosticsLogger"))
+            select t);
 
-        Assembly.Load("Microsoft.EntityFrameworkCore.Relational");
-
-        var efCoreRelationAsm = assemblies.FirstOrDefault(x => x.GetName().Name == "Microsoft.EntityFrameworkCore.Relational");
-        if (efCoreRelationAsm == null)
-        {
-            throw new Exception("Something is wrong");
-            return services;
-        }
+        var efCoreRelationAsm = (
+            from asm in assemblies
+            where asm.GetName().Name == EfCoreRelationalAssemblyString
+            select asm).Single();
 
         Type [] efCoreRelationalTypes = efCoreRelationAsm.GetTypes();
-        var diagnosticsLogger = efCoreRelationalTypes.Single(x => x.FullName == "Microsoft.EntityFrameworkCore.Diagnostics.Internal.RelationalCommandDiagnosticsLogger");
 
-        var d = diagnosticsLogger
-        .GetMethods(AccessTools.all)
-        .Where(x => x.Name.Contains("Executed"));
+        var diagnosticsLoggerType = (
+            from t in efCoreRelationalTypes
+            where t.FullName == DiagnosticLoggerFullname
+            select t).Single();
 
+        MethodInfo [] diagnosticsLoggerMethods = diagnosticsLoggerType.GetMethods(AccessTools.all);
+
+        var d = (
+            from m in diagnosticsLoggerMethods
+            where m.Name.Contains("Executed")
+            select m);
+
+#if ENABLE_GENERIC_HOOKS
         var genericHook = typeof(Hooks).GetMethod(nameof(Hooks.GenericHook));
 
-        // foreach (var method in diagnosticsLoggerMethods) {
-        //     h.Patch(prefix: new HarmonyMethod(genericHook), original: method);
-        // }
+        foreach (var method in diagnosticsLoggerMethods)
+        {
+            h.Patch(prefix: new HarmonyMethod(genericHook), original: method);
+        }
+#endif
 
-        h.Patch(d.Single(x => x.Name == "CommandReaderExecuted"), new HarmonyMethod(GetHook((nameof(Hooks.CommandReaderExecuted)))));
-        h.Patch(d.Single(x => x.Name == "CommandScalarExecuted"), new HarmonyMethod(GetHook(nameof(Hooks.CommandScalarExecuted))));
-        h.Patch(d.Single(x => x.Name == "CommandNonQueryExecuted"), new HarmonyMethod(GetHook(nameof(Hooks.CommandNonQueryExecuted))));
-        h.Patch(d.Single(x => x.Name == "CommandReaderExecutedAsync"), new HarmonyMethod(GetHook(nameof(Hooks.CommandReaderExecutedAsync))));
-        h.Patch(d.Single(x => x.Name == "CommandScalarExecutedAsync"), new HarmonyMethod(GetHook(nameof(Hooks.CommandScalarExecutedAsync))));
-        h.Patch(d.Single(x => x.Name == "CommandNonQueryExecutedAsync"), new HarmonyMethod(GetHook(nameof(Hooks.CommandNonQueryExecutedAsync))));
+        patch(h, d, "CommandReaderExecuted");
+        patch(h, d, "CommandScalarExecuted");
+        patch(h, d, "CommandNonQueryExecuted");
+        patch(h, d, "CommandReaderExecutedAsync");
+        patch(h, d, "CommandScalarExecutedAsync");
+        patch(h, d, "CommandNonQueryExecutedAsync");
 
         var relationCommandType = efCoreRelationalTypes.Single(x => x.Name == "RelationalCommand");
         var methods = relationCommandType.GetMethods(AccessTools.all);
         var original = methods.Single(x => x.Name == "ExecuteReader");
-        var prefix = GetHook(nameof(Hooks.ExecuteReaderPrefix));
-        var postfix = GetHook(nameof(Hooks.ExecuteReaderPostfix));
+        var prefix = typeof(Hooks).GetMethod(nameof(Hooks.ExecuteReaderPrefix));
+        var postfix = typeof(Hooks).GetMethod(nameof(Hooks.ExecuteReaderPostfix));
 
         h.Patch(original, prefix: new HarmonyMethod(prefix), postfix: new HarmonyMethod(postfix));
 
-        #endregion
-
-        return services;
+        return s;
     }
+
+    private static void patch(Harmony harmony, IEnumerable<MethodInfo> methods, string name) => harmony.Patch(methods.Single(x => x.Name == name), new HarmonyMethod(typeof(Hooks).GetMethod(name)));
 
     public static WebApplication UseNanodbProfilerToolbar(this WebApplication app, string route = "query-log")
     {
-
         EfQueryLog.ServiceScopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
 
         app.MapGet(route, ([FromServices] EfCoreMetrics metrics, HttpRequest h) =>

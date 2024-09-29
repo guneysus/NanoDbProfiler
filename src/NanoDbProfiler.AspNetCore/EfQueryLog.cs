@@ -28,7 +28,6 @@ public static class EfQueryLog
 
     internal static IResult HtmlResult(EfCoreMetrics metrics)
     {
-
         var htmlBuilder = new StringBuilder();
 
         htmlBuilder.Append(@"<!DOCTYPE html>
@@ -106,7 +105,6 @@ public static class EfQueryLog
     <div id='metrics-container'>");
 
         var s = new DashboardData(metrics.Data);
-
 
         foreach (var summary in s.Summaries)
         {
