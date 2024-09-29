@@ -109,13 +109,10 @@ this.ScenarioInitialize(scenarioInfo);
             {
                 this.ScenarioStart();
 #line 6
- testRunner.Given("the endpoint is /insert", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+ testRunner.When("/insert", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
 #line 7
- testRunner.When("executed", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
-#line hidden
-#line 8
- testRunner.Then("profiled query should be", "INSERT INTO \"Todos\" (\"Title\")\r\nVALUES (@p0)\r\nRETURNING \"Id\";", ((TechTalk.SpecFlow.Table)(null)), "Then ");
+ testRunner.Then("query should be", "INSERT INTO \"Todos\" (\"Title\")\r\nVALUES (@p0)\r\nRETURNING \"Id\";", ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             }
             this.ScenarioCleanup();
@@ -129,7 +126,7 @@ this.ScenarioInitialize(scenarioInfo);
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Update Query", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
-#line 16
+#line 15
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
             bool isScenarioIgnored = default(bool);
@@ -149,14 +146,11 @@ this.ScenarioInitialize(scenarioInfo);
             else
             {
                 this.ScenarioStart();
+#line 16
+ testRunner.When("/update", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+#line hidden
 #line 17
- testRunner.Given("the endpoint is /update", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
-#line hidden
-#line 18
- testRunner.When("executed", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
-#line hidden
-#line 19
- testRunner.Then("profiled query should be", "UPDATE \"Todos\" SET \"Title\" = @p0\r\nWHERE \"Id\" = @p1\r\nRETURNING 1;", ((TechTalk.SpecFlow.Table)(null)), "Then ");
+ testRunner.Then("query should be", "UPDATE \"Todos\" SET \"Title\" = @p0\r\nWHERE \"Id\" = @p1\r\nRETURNING 1;", ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             }
             this.ScenarioCleanup();
@@ -170,7 +164,7 @@ this.ScenarioInitialize(scenarioInfo);
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Select Scalar", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
-#line 26
+#line 24
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
             bool isScenarioIgnored = default(bool);
@@ -190,14 +184,11 @@ this.ScenarioInitialize(scenarioInfo);
             else
             {
                 this.ScenarioStart();
-#line 27
- testRunner.Given("the endpoint is /select/scalar", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+#line 25
+ testRunner.When("/select/scalar", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
-#line 28
- testRunner.When("executed", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
-#line hidden
-#line 29
- testRunner.Then("profiled query should be", "SELECT \"t\".\"Id\"\r\nFROM \"Todos\" AS \"t\"", ((TechTalk.SpecFlow.Table)(null)), "Then ");
+#line 26
+ testRunner.Then("query should be", "SELECT \"t\".\"Id\"\r\nFROM \"Todos\" AS \"t\"", ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             }
             this.ScenarioCleanup();
@@ -211,7 +202,7 @@ this.ScenarioInitialize(scenarioInfo);
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Select Single #1", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
-#line 35
+#line 32
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
             bool isScenarioIgnored = default(bool);
@@ -231,14 +222,11 @@ this.ScenarioInitialize(scenarioInfo);
             else
             {
                 this.ScenarioStart();
-#line 36
- testRunner.Given("the endpoint is /select/single/1", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+#line 33
+ testRunner.When("/select/single/1", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
-#line 37
- testRunner.When("executed", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
-#line hidden
-#line 38
- testRunner.Then("profiled query should be", "SELECT \"t\".\"Id\", \"t\".\"Title\"\r\nFROM \"Todos\" AS \"t\"\r\nLIMIT 1", ((TechTalk.SpecFlow.Table)(null)), "Then ");
+#line 34
+ testRunner.Then("query should be", "SELECT \"t\".\"Id\", \"t\".\"Title\"\r\nFROM \"Todos\" AS \"t\"\r\nLIMIT 1", ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             }
             this.ScenarioCleanup();
@@ -252,7 +240,7 @@ this.ScenarioInitialize(scenarioInfo);
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Select Single #2", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
-#line 45
+#line 41
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
             bool isScenarioIgnored = default(bool);
@@ -272,14 +260,11 @@ this.ScenarioInitialize(scenarioInfo);
             else
             {
                 this.ScenarioStart();
-#line 46
- testRunner.Given("the endpoint is /select/single/2", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+#line 42
+ testRunner.When("/select/single/2", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
-#line 47
- testRunner.When("executed", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
-#line hidden
-#line 48
- testRunner.Then("profiled query should be", "SELECT \"t\".\"Id\", \"t\".\"Title\"\r\nFROM \"Todos\" AS \"t\"\r\nLIMIT 1 OFFSET @__p_0", ((TechTalk.SpecFlow.Table)(null)), "Then ");
+#line 43
+ testRunner.Then("query should be", "SELECT \"t\".\"Id\", \"t\".\"Title\"\r\nFROM \"Todos\" AS \"t\"\r\nLIMIT 1 OFFSET @__p_0", ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             }
             this.ScenarioCleanup();
@@ -293,7 +278,7 @@ this.ScenarioInitialize(scenarioInfo);
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Select All", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
-#line 55
+#line 50
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
             bool isScenarioIgnored = default(bool);
@@ -313,14 +298,11 @@ this.ScenarioInitialize(scenarioInfo);
             else
             {
                 this.ScenarioStart();
-#line 56
- testRunner.Given("the endpoint is /select/all", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+#line 51
+ testRunner.When("/select/all", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
-#line 57
- testRunner.When("executed", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
-#line hidden
-#line 58
- testRunner.Then("profiled query should be", "SELECT \"t\".\"Id\", \"t\".\"Title\"\r\nFROM \"Todos\" AS \"t\"", ((TechTalk.SpecFlow.Table)(null)), "Then ");
+#line 52
+ testRunner.Then("query should be", "SELECT \"t\".\"Id\", \"t\".\"Title\"\r\nFROM \"Todos\" AS \"t\"", ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             }
             this.ScenarioCleanup();
@@ -334,7 +316,7 @@ this.ScenarioInitialize(scenarioInfo);
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Delete Single", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
-#line 65
+#line 59
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
             bool isScenarioIgnored = default(bool);
@@ -354,14 +336,11 @@ this.ScenarioInitialize(scenarioInfo);
             else
             {
                 this.ScenarioStart();
-#line 66
- testRunner.Given("the endpoint is /delete/single", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+#line 60
+ testRunner.When("/delete/single", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
-#line 67
- testRunner.When("executed", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
-#line hidden
-#line 68
- testRunner.Then("profiled query should be", "DELETE FROM \"Todos\"\r\nWHERE \"Id\" = @p0\r\nRETURNING 1;", ((TechTalk.SpecFlow.Table)(null)), "Then ");
+#line 61
+ testRunner.Then("query should be", "DELETE FROM \"Todos\"\r\nWHERE \"Id\" = @p0\r\nRETURNING 1;", ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             }
             this.ScenarioCleanup();
@@ -375,7 +354,7 @@ this.ScenarioInitialize(scenarioInfo);
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Delete All", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
-#line 75
+#line 68
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
             bool isScenarioIgnored = default(bool);
@@ -395,14 +374,11 @@ this.ScenarioInitialize(scenarioInfo);
             else
             {
                 this.ScenarioStart();
-#line 76
- testRunner.Given("the endpoint is /delete/all", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+#line 69
+ testRunner.When("/delete/all", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
-#line 77
- testRunner.When("executed", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
-#line hidden
-#line 78
- testRunner.Then("profiled query should be", "DELETE FROM \"Todos\" AS \"t\"", ((TechTalk.SpecFlow.Table)(null)), "Then ");
+#line 70
+ testRunner.Then("query should be", "DELETE FROM \"Todos\" AS \"t\"", ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             }
             this.ScenarioCleanup();

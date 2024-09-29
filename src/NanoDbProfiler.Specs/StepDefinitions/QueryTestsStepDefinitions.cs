@@ -12,52 +12,40 @@ using Shouldly;
 namespace NanoDbProfiler.Specs.StepDefinitions;
 
 [Binding]
-public sealed class QueryTestsStepDefinitions : IClassFixture<WebApplicationFactory<Program>>, IDisposable
+public sealed class QueryTestsStepDefinitions : IClassFixture<WebApplicationFactory<Program>>
 {
     private readonly WebApplicationFactory<Program> _factory;
-    private HttpClient _client;
-    private string _url;
+    private HttpClient client;
 
     public QueryTestsStepDefinitions(WebApplicationFactory<Program> factory)
     {
         this._factory = factory;
+        this.client = _factory.CreateClient();
     }
 
-    [Given(@"the endpoint is (.*)")]
-    public async Task GivenTheEndpointIsInsertAsync(string url)
+    [When(@"(.*)")]
+    public async Task WhenExecutedAsync(string url)
     {
         // Arrange
-        this._client = _factory.CreateClient();
-        _client.DefaultRequestHeaders.Add("accept", "application/json");
-        this._url = url;
-        await _client.GetAsync("/insert");
-        await _client.DeleteAsync("/query-log");
-        _ = await _client.GetAsync("/");
+        client.DefaultRequestHeaders.Add("accept", "application/json");
+        await client.GetAsync("/insert");
+        await client.DeleteAsync("/query-log");
+        _ = await client.GetAsync("/");
+
+        // Act
+        await client.GetAsync(url);
     }
 
-
-    [When(@"executed")]
-    public async Task WhenExecutedAsync() =>
-        // Act
-
-        _ = await _client.GetAsync(_url);
-
-
-    [Then(@"profiled query should be")]
+    [Then(@"query should be")]
     public async Task ThenLastSummaryShouldBeAsync(string expectedQuery)
     {
         // Assert
-        var response = await _client.GetAsync("/query-log");
+        var response = await client.GetAsync("/query-log");
         var data = await response.Content.ReadFromJsonAsync<DashboardData>();
 
         //@out.WriteLine(EfQueryLog.TextRepr(data));
 
         data.Summaries.ShouldNotBeEmpty();
         data.Summaries.Last().Query.ShouldBe(expectedQuery);
-    }
-
-    public void Dispose()
-    {
-
     }
 }
