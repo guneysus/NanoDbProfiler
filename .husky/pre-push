@@ -1,0 +1,18 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+echo 'Welcome!'
+dotnet husky run --name welcome
+
+echo 'Prepare Release'
+dotnet msbuild -bl -p:Configuration=Release -p:Deterministic=true src/NanoDbProfiler.AspNetCore/NanoDbProfiler.AspNetCore.csproj
+
+echo "Package nuget"
+dotnet pack ./src/NanoDbProfiler.AspNetCore/NanoDbProfiler.AspNetCore.csproj -o dist/ --no-build --configuration Release
+
+echo 'Publish Release'
+	dotnet nuget push "dist/NanoDbProfiler.AspNetCore.$(dotnet tool run nbgv get-version -v NuGetPackageVersion).nupkg" \
+		--source https://www.myget.org/F/guneysu/api/v2/package --api-key=$MYGET_API_KEY
+
+echo "Published Nuget Version:"
+echo $(dotnet tool run nbgv get-version -v NuGetPackageVersion)

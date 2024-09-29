@@ -1,0 +1,58 @@
+{
+  "tasks": [
+    {
+      "name": "welcome",
+      "args": [
+        "-c",
+        "echo Husky.Net is awesome!"
+      ],
+      "command": "bash",
+      "windows": {
+        "args": [
+          "/c",
+          "echo Husky.Net is awesome!"
+        ],
+        "command": "cmd"
+      }
+    },
+    {
+      "name": "restore",
+      "args": [
+        "restore",
+        "src/NanoDbProfiler.sln"
+      ],
+      "command": "dotnet",
+      "group": "pre-commit-operations"
+    },
+    {
+      "name": "build",
+      "args": [
+        "build",
+        "src/NanoDbProfiler.sln"
+      ],
+      "command": "dotnet",
+      "group": "pre-commit-operations"
+    },
+    {
+      "name": "format-staged",
+      "args": [
+        "format",
+        "src/NanoDbProfiler.sln",
+        "--include",
+        "${staged}"
+      ],
+      "command": "dotnet",
+      "group": "pre-commit-operations"
+    },
+    {
+      "name": "test",
+      "args": [
+        "test",
+        "src/NanoDbProfiler.sln",
+        "--no-build"
+      ],
+      "command": "dotnet",
+      "group": "pre-commit-operations",
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+echo 'Welcome!'
+dotnet husky run --name welcome
+
+echo 'Restore'
+dotnet husky run --name restore
+
+echo 'Build'
+dotnet husky run --name build
+
+echo 'Format'
+dotnet husky run --verbose --name format-staged 
+
+echo 'Test'
+dotnet husky run --name test
+
+echo 'Completed pre-commit changes'
