@@ -17,7 +17,7 @@ public static class AspnetCoreExtensions
 
         var h = new Harmony("id");
 
-        Assembly [] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+        Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
         var diagnosticsLoggerTypes = (
             from t in assemblies.SelectMany(t => t.GetTypes())
@@ -29,14 +29,14 @@ public static class AspnetCoreExtensions
             where asm.GetName().Name == EfCoreRelationalAssemblyString
             select asm).Single();
 
-        Type [] efCoreRelationalTypes = efCoreRelationAsm.GetTypes();
+        Type[] efCoreRelationalTypes = efCoreRelationAsm.GetTypes();
 
         var diagnosticsLoggerType = (
             from t in efCoreRelationalTypes
             where t.FullName == DiagnosticLoggerFullname
             select t).Single();
 
-        MethodInfo [] diagnosticsLoggerMethods = diagnosticsLoggerType.GetMethods(AccessTools.all);
+        MethodInfo[] diagnosticsLoggerMethods = diagnosticsLoggerType.GetMethods(AccessTools.all);
 
         var diagLoggerMethods = (
             from m in diagnosticsLoggerMethods
@@ -83,7 +83,7 @@ public static class AspnetCoreExtensions
 
         app.MapGet(route, ([FromServices] EfCoreMetrics metrics, HttpRequest h) =>
         {
-            MediaTypeHeaderValue.TryParseList(h.Headers ["Accept"], out var accept);
+            MediaTypeHeaderValue.TryParseList(h.Headers["Accept"], out var accept);
 
             IResult resp = accept switch
             {

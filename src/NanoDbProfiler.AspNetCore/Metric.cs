@@ -9,5 +9,5 @@ public struct Metric
 #if ENABLE_PARAMETERS_DICT
     public IDictionary<string, object?> Parameters { get; set; }
 #endif
-    }
+}
 

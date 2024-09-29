@@ -39,8 +39,8 @@ public struct DashboardData
         double rank = (percentile / 100.0) * (n - 1);
 
         // Determine the integer and fractional part of the rank
-        int lowerIndex = (int) Math.Floor(rank);
-        int upperIndex = (int) Math.Ceiling(rank);
+        int lowerIndex = (int)Math.Floor(rank);
+        int upperIndex = (int)Math.Ceiling(rank);
 
         if (lowerIndex == upperIndex)
             return values[lowerIndex];

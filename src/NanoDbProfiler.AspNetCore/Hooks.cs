@@ -8,7 +8,7 @@ public static class Hooks
         __state.Start();
     }
 
-    public static void CommandReaderExecuted(object [] __args, TimeSpan duration, object command) => processLog(duration, command);
+    public static void CommandReaderExecuted(object[] __args, TimeSpan duration, object command) => processLog(duration, command);
 
     public static void CommandScalarExecuted(TimeSpan duration, object command) => processLog(duration, command);
 
@@ -82,7 +82,7 @@ public static class Hooks
             return; 
 #endif
 
-            var metric = new Metric
+        var metric = new Metric
         {
             Duration = __state.Elapsed.TotalMilliseconds,
             Query = cmdText,
