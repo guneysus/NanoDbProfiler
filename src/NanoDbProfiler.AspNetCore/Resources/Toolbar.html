@@ -39,9 +39,9 @@
     /* Style for visually separating records */
     .query-record {
         border: 1px solid #555;
-        padding: 10px;
-        border-radius: 5px;
-        margin-bottom: 10px;
+        padding: 0 8px 8px 8px;
+        border-radius: 8px;
+        margin-bottom: 8px;
         background-color: #2c2c2c;
         position: relative;
     }
@@ -49,25 +49,25 @@
     /* Duration bar styling */
     .duration-bar {
         height: 10px;
-        background-color: #4CAF50; /* Default color for short queries */
+        background-color: #4CAF50;
+        /* Default color for short queries */
         border-radius: 5px;
         margin-top: 5px;
     }
 
     /* Style for the buttons */
     .toolbar-button {
-        background-color: #4CAF50;
-        color: white;
-        border: none;
+        color: black;
         padding: 5px 10px;
         cursor: pointer;
-        border-radius: 3px;
+        /* border-radius: 3px; */
     }
 
     .toolbar-button.clear {
         background-color: #ff5555;
     }
 
+    
     .toolbar-button:hover {
         opacity: 0.9;
     }
@@ -84,12 +84,14 @@
         color: white;
         z-index: 9999;
         transition: height 0.3s;
-        font-size: 12px; /* Reduced font size */
+        font-size: 12px;
+        /* Reduced font size */
     }
 
     #toolbar-header {
-        padding: 10px;
+        padding: 5px;
         display: flex;
+        border-bottom: 1px solid gray;
         justify-content: space-between;
         align-items: center;
         cursor: pointer;
@@ -105,59 +107,59 @@
     /* Minimize/Maximize buttons styling */
     .toolbar-actions {
         display: flex;
-        gap: 10px;
+        gap: 0px;
+    }
+
+    #toolbar-header__title {
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    #query-log {
+        max-height: calc(100vh - 140px);
+        overflow-y: auto;
+        background-color: #333;
+        padding: 10px;
+        border-radius: 5px;
+    }
+
+    .feather {
+        width: 16px;
+        height: 16px;
+        stroke: currentColor;
+        stroke-width: 1;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        fill: none;
     }
 </style>
 
 <div id="debug-toolbar">
     <div id="toolbar-header">
         <!-- Toolbar title with query count -->
-        <span style="font-size: 16px; font-weight: 500;">NanoDBProfiler Toolbar (Total Queries: <span id="total-queries">0</span>)</span>
-        
+        <span id="toolbar-header__title">NanoDBProfiler Toolbar (Total Queries: <span
+                id="total-queries">0</span>)</span>
+
         <!-- Minimize/Maximize buttons and other toolbar actions -->
         <div class="toolbar-actions">
-            <button id="clear-log" class="toolbar-button clear">Clear Log</button>
-            <button id="refresh-log" class="toolbar-button">Refresh Logs</button>
-            <button id="minimize-toolbar" class="toolbar-button">Minimize</button>
-            <button id="maximize-toolbar" class="toolbar-button">Maximize</button>
+            <button id="clear-log" class="toolbar-button clear"><i data-feather="delete"></i></button>
+            <button id="refresh-log" class="toolbar-button"><i data-feather="refresh-cw"></i></button>
+            <button id="toggle-toolbar" class="toolbar-button"><i data-feather="toggle-left"></i></button>
+            <button id="maximize-toolbar" class="toolbar-button maximize"><i data-feather="maximize-2"></i></button>
+            <button id="minimize-toolbar" class="toolbar-button minimize"><i data-feather="minimize-2"></i></button>
         </div>
     </div>
     <div id="debug-content">
-        <div id="query-log" style="max-height: 200px; overflow-y: auto; background-color: #333; padding: 10px; border-radius: 5px;">
+        <div id="query-log">
             <!-- Logs will appear here -->
         </div>
     </div>
 </div>
 
 <script>
-    document.getElementById('toolbar-header').addEventListener('click', function () {
-        var content = document.getElementById('debug-content');
-        var toolbar = document.getElementById('debug-toolbar');
 
-        // Toggling the toolbar height and content visibility
-        if (toolbar.style.height === '340px') {
-            // Collapse
-            content.style.height = '0';
-            toolbar.style.height = '40px';
-        } else {
-            // Expand
-            toolbar.style.height = '340px';
-            content.style.height = '300px';
-            loadQueryLog(); // Load the query log when expanding
-        }
-    });
-
-    // Minimize toolbar
-    document.getElementById('minimize-toolbar').addEventListener('click', function () {
-        document.getElementById('debug-content').style.height = '0';
-        document.getElementById('debug-toolbar').style.height = '40px';
-    });
-
-    // Maximize toolbar
-    document.getElementById('maximize-toolbar').addEventListener('click', function () {
-        document.getElementById('debug-toolbar').style.height = '340px';
-        document.getElementById('debug-content').style.height = '300px';
-    });
+    var isExpanded = false;  // Tracks if the toolbar is in expanded state
+    var isMaximized = false; // Tracks if the toolbar is in maximized state
 
     // Function to load the query log via XHR
     function loadQueryLog() {
@@ -181,7 +183,124 @@
         xhr.send();
     }
 
-    // Function to render the query log data
+    document.addEventListener('DOMContentLoaded', function () {
+        feather.replace();
+        // Maximize button: expands toolbar to full-page height or restores it
+        document.getElementById('maximize-toolbar').addEventListener('click', function (event) {
+
+            event.stopPropagation();
+
+            var toolbar = document.getElementById('debug-toolbar');
+            var debugContent = document.getElementById('debug-content');
+            var minimizeBtn = document.getElementById('minimize-toolbar');
+            var maximizeBtn = document.getElementById('maximize-toolbar');
+            var toolbarHeader = document.getElementById('toolbar-header');
+
+            if (!isMaximized) {
+                toolbar.style.height = '100vh';  // Full viewport height
+                debugContent.style.height = 'calc(100vh - 40px)'; // Content height minus header
+                isMaximized = true;              // Set maximized state
+                isExpanded = false;              // Reset expanded state
+                loadQueryLog();
+            } else {
+                // If already maximized, restore to default size
+                toolbar.style.height = '340px';
+                debugContent.style.height = '300px';
+                isMaximized = false;
+                isExpanded = true;
+                loadQueryLog();
+            }
+        });
+
+
+        // Minimize button: hides the entire toolbar
+        document.getElementById('minimize-toolbar').addEventListener('click', function (event) {
+            event.stopPropagation();
+
+            var toolbar = document.getElementById('debug-toolbar');
+            var debugContent = document.getElementById('debug-content');
+
+            // Collapse if already expanded
+            toolbar.style.height = '40px';
+            debugContent.style.height = '0';
+            isExpanded = false;
+        });
+
+
+        // Toolbar header: toggles between collapsed and expanded states
+        document.getElementById('toolbar-header').addEventListener('click', function () {
+            var toolbar = document.getElementById('debug-toolbar');
+            var debugContent = document.getElementById('debug-content');
+
+            if (isMaximized) {
+                // If maximized, restore to expanded size
+                toolbar.style.height = '340px';
+                debugContent.style.height = '300px';
+                isMaximized = false;
+                isExpanded = true;
+                loadQueryLog();
+            } else if (isExpanded) {
+                // Collapse if already expanded
+                toolbar.style.height = '40px';
+                debugContent.style.height = '0';
+                isExpanded = false;
+            } else {
+                // Expand to normal size
+                toolbar.style.height = '340px';
+                debugContent.style.height = '300px';
+                isExpanded = true;
+                loadQueryLog();
+            }
+        });
+
+        // Function to refresh the query log via XHR
+        document.getElementById('refresh-log').addEventListener('click', function (event) {
+            event.stopPropagation();
+            loadQueryLog(); // Refresh the log by reloading the data
+        });
+
+        document.getElementById('toggle-toolbar').addEventListener('click', function (event) {
+            event.stopPropagation();
+
+            var content = document.getElementById('debug-content');
+            var toolbar = document.getElementById('debug-toolbar');
+
+            // Toggling the toolbar height and content visibility
+            if (toolbar.style.height === '340px') {
+                // Collapse
+                content.style.height = '0';
+                toolbar.style.height = '40px';
+            } else {
+                // Expand
+                toolbar.style.height = '340px';
+                content.style.height = '300px';
+                loadQueryLog(); // Load the query log when expanding
+            }
+        });
+
+        // Function to clear the query log via DELETE request
+        document.getElementById('clear-log').addEventListener('click', function (event) {
+            event.stopPropagation();
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('DELETE', '/query-log', true);
+            xhr.onload = function () {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    // Clear the log in the UI after successful delete
+                    document.getElementById('query-log').innerHTML = 'Query log cleared.';
+                } else {
+                    alert('Failed to clear query log.');
+                }
+            };
+            xhr.onerror = function () {
+                alert('Failed to clear query log.');
+            };
+            xhr.send();
+        });
+
+    });
+
+
     function renderQueryLog(data) {
         var queryLogElement = document.getElementById('query-log');
         queryLogElement.innerHTML = ''; // Clear previous content
@@ -210,16 +329,15 @@
                     durationBar.style.backgroundColor = '#ffbf00'; // Yellow for moderate queries
                 }
 
-                var durationText = document.createElement('span');
-                durationText.textContent = summary.p95.toFixed(3) + 'ms';
-                durationText.style.position = 'absolute';
-                durationText.style.right = '10px';
-                durationText.style.top = '10px';
-                durationText.style.fontWeight = 'bold';
+                // Container for the duration and count info
+                var durationInfo = document.createElement('div');
+                durationInfo.style.fontSize = '12px'; // Smaller text size for compactness
+                durationInfo.style.marginTop = '5px'; // Space between the bar and text
+                durationInfo.innerHTML = `Duration: ${summary.p95.toFixed(3)} ms | Total: ${summary.total}`;
 
                 queryDiv.appendChild(queryText);
                 queryDiv.appendChild(durationBar);
-                queryDiv.appendChild(durationText);
+                queryDiv.appendChild(durationInfo);
                 queryLogElement.appendChild(queryDiv);
             });
         } else {
@@ -230,26 +348,6 @@
         document.getElementById('total-queries').textContent = data.summaries.length;
     }
 
-    // Function to clear the query log via DELETE request
-    document.getElementById('clear-log').addEventListener('click', function () {
-        var xhr = new XMLHttpRequest();
-        xhr.open('DELETE', '/query-log', true);
-        xhr.onload = function () {
-            if (xhr.status >= 200 && xhr.status < 300) {
-                // Clear the log in the UI after successful delete
-                document.getElementById('query-log').innerHTML = 'Query log cleared.';
-            } else {
-                alert('Failed to clear query log.');
-            }
-        };
-        xhr.onerror = function () {
-            alert('Failed to clear query log.');
-        };
-        xhr.send();
-    });
-
-    // Function to refresh the query log via XHR
-    document.getElementById('refresh-log').addEventListener('click', function () {
-        loadQueryLog(); // Refresh the log by reloading the data
-    });
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>

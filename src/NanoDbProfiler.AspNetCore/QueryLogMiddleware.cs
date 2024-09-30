@@ -37,12 +37,9 @@ public class QueryLogMiddleware
             var names = assembly.GetManifestResourceNames();
             var resourceName = "NanoDbProfiler.AspNetCore.Resources.Toolbar.html";
 
-            using (Stream stream = assembly.GetManifestResourceStream(resourceName))
-            using (StreamReader reader = new StreamReader(stream))
-            {
-                toolbarHtml = reader.ReadToEnd();
-            }
-
+            using var stream = assembly.GetManifestResourceStream(resourceName);
+            using var reader = new StreamReader(stream);
+            toolbarHtml = reader.ReadToEnd();
 
             if (body.Contains("<body>"))
             {
