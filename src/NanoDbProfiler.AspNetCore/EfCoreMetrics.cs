@@ -1,7 +1,4 @@
-﻿
-using System.Runtime.CompilerServices;
-
-namespace Microsoft.Extensions.DependencyInjection;
+﻿namespace Microsoft.Extensions.DependencyInjection;
 
 public class EfCoreMetrics
 {
