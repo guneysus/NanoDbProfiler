@@ -79,6 +79,8 @@ public static class AspnetCoreExtensions
 
     public static WebApplication UseNanodbProfilerToolbar(this WebApplication app, string route = "query-log")
     {
+        app.UseMiddleware<QueryLogMiddleware>();
+
         EfQueryLog.ServiceScopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
 
         app.MapGet(route, ([FromServices] EfCoreMetrics metrics, HttpRequest h) =>
@@ -103,7 +105,6 @@ public static class AspnetCoreExtensions
             return Results.NoContent();
         });
 
-        app.UseMiddleware<QueryLogMiddleware>();
 
         return app;
     }

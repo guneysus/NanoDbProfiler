@@ -14,6 +14,7 @@ public class Program
             .AddNanoDbProfiler();
 
         var app = builder.Build();
+        app.UseNanodbProfilerToolbar();
 
         app.MapGet("/", async (HttpContext h, [FromServices] TodoContext db) =>
         {
@@ -59,8 +60,6 @@ public class Program
             await db.Todos.ExecuteDeleteAsync();
             return Results.Ok();
         });
-
-        app.UseNanodbProfilerToolbar();
 
         app.Run();
     }

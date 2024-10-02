@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>NanoDbProfiler for Entity Framework Core</title>
+    <!-- development version, includes helpful console warnings -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <script src="https://unpkg.com/vuetable-2@next"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+
+    <div id="app">
+        {{ message }}
+    </div>
+
+    <script>
+        var app = new Vue({
+            el: '#app',
+            components: {
+                Vuetable
+            },
+            data: {
+                message: 'Hello Vue!'
+            }
+        });
+
+
+        // Make a request for a user with a given ID
+        axios.request({
+            method: 'get',
+            url: "/query-log",
+            headers: {
+                'accept': 'application/json'
+            },
+        }).then(function(response) {
+            // handle success
+            console.log(response.data);
+        })
+        .catch(function(error) {
+            // handle error
+            console.log(error);
+        })
+        .finally(function() {
+            // always executed
+        });
+
+    </script>
+</body>
+
+</html>

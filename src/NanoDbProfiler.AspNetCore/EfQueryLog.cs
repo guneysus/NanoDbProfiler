@@ -20,29 +20,9 @@ public static class EfQueryLog
     internal static IResult HtmlResult(EfCoreMetrics metrics)
     {
         // Load header and footer HTML from resources folder
-        var headerHtml = File.ReadAllText("Resources/header.html");
-        var footerHtml = File.ReadAllText("Resources/footer.html");
-        var metricCardTemplate = File.ReadAllText("Resources/metric-card.html");
+        var pageHtml = EmbeddedResourceHelpers.GetResource("Page.html");
 
-        var htmlBuilder = new StringBuilder();
-
-        htmlBuilder.Append(headerHtml);
-
-        var s = new DashboardData(metrics.Data);
-
-        foreach (var summary in s.Summaries)
-        {
-            var metricCardHtml = metricCardTemplate
-                .Replace("{P95}", summary.P95.ToString())
-                .Replace("{Total}", summary.Total.ToString())
-                .Replace("{Query}", summary.Query);
-
-            htmlBuilder.Append(metricCardHtml);
-        }
-
-        htmlBuilder.Append(footerHtml); // Add the footer
-
-        return Results.Text(htmlBuilder.ToString(), "text/html");
+        return Results.Text(pageHtml, "text/html");
     }
 
     internal static IResult JsonResult(EfCoreMetrics metrics) => Results.Json(new DashboardData(GetMetricsDb().Data));

@@ -18,7 +18,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\NanoDbProfiler.AspNetCore\NanoDbProfiler.AspNetCore.csproj" />
+      <ProjectReference Include="..\NanoDbProfiler.AspNetCore\NanoDbProfiler.AspNetCore.csproj" />
     </ItemGroup>
 
 </Project>
