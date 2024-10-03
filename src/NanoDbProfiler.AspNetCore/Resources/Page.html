@@ -9,11 +9,105 @@
     <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
     <script src="https://unpkg.com/vuetable-2@next"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <style>
+
+        /* General scrollbar styling for the page */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #333;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background-color: #555;
+            border-radius: 4px;
+        }
+
+            ::-webkit-scrollbar-thumb:hover {
+                background-color: #777;
+            }
+
+        /* Toolbar scrollbar styling */
+        #query-log::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #query-log::-webkit-scrollbar-track {
+            background: #222;
+        }
+
+        #query-log::-webkit-scrollbar-thumb {
+            background-color: #555;
+            border-radius: 4px;
+        }
+
+            #query-log::-webkit-scrollbar-thumb:hover {
+                background-color: #777;
+            }
+
+        /* Style for visually separating records */
+        .query-record {
+            border: 1px solid #555;
+            padding: 0 8px 8px 8px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            /* background-color: #2c2c2c; */
+            position: relative;
+        }
+
+        /* Duration bar styling */
+        .duration-bar {
+            height: 10px;
+            background-color: #4CAF50;
+            /* Default color for short queries */
+            border-radius: 5px;
+            margin-top: 5px;
+        }
+    </style>
 </head>
 <body>
 
     <div id="app">
-        {{ message }}
+        <div>
+            <h2>NanoDB Profiler & Sample Queries</h2>
+            <button @click="loadQueries">Refresh</button>
+            <button @click="purgeQueries">Clean</button>
+            <button @click="loadQuery(selectedUrl)">Repeat</button>
+            <!-- Dropdown to select URLs -->
+            <label for="urlSelect">Choose an endpoint:</label>
+            <select v-model="selectedUrl" @change="loadQuery(selectedUrl)">
+                <option v-for="url in urls" :key="url" :value="url">{{ url }}</option>
+            </select>
+
+            <div v-if="responseData">
+                <h3>Response:</h3>
+                <b>{{ responseData }}</b>
+            </div>
+
+        </div>
+
+        <div class="query-list">
+            <div v-for="summary in summaries" :key="summary.id" class="query-record">
+                <pre>{{ summary.query }}</pre>
+                <!-- <div class="duration-bar" :style="{ width: (summary.p95 / maxDuration * 100) + '%' }"></div> -->
+
+                <div class="duration-bar"
+                     :style="{
+                            backgroundColor: getDurationBarColor(summary.p95),
+                            width: (summary.p95 / maxDuration * 100) + '%'  }">
+                    <!-- Other content for the duration bar -->
+                </div>
+
+                <div class="query-details">
+                    <span>Total Count: {{ summary.total }}</span>
+                    <span>Duration: {{ summary.p95.toFixed(3) }}ms</span>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -23,30 +117,98 @@
                 Vuetable
             },
             data: {
-                message: 'Hello Vue!'
+                selectedUrl: '', // Bind the selected URL from the dropdown
+                summaries: [],
+                urls: [
+                    '/insert',
+                    '/update',
+                    '/select/single/1',
+                    '/select/single/2',
+                    '/select/all',
+                    '/select/scalar',
+                    '/select/max-id',
+                    '/select/count',
+                    '/select/sum',
+                    '/select/orderby-desc',
+                    '/select/avg',
+                    '/select/starts-with',
+                    '/select/ends-with',
+                    '/select/contains',
+                    '/select/distinct-by',
+                    '/select/find',
+                    '/delete/single',
+                    '/delete/all'
+                ], // List of URLs for the dropdown
+                responseData: null, // Store response from the server
+            },
+            created: function() {
+                this.loadQueries();
+            },
+            computed: {
+                maxDuration: function() {
+                    if (this.summaries.length == 0) {
+                        return 0;
+                    }
+
+                    return Math.max(...this.summaries.map(s => s.p95));
+                }
+            },
+            methods: {
+                // Generic method to handle different types of API requests
+                async loadQuery(endpoint, method = 'get') {
+                    try {
+                        let response;
+                        switch (method.toLowerCase()) {
+                            case 'post':
+                                response = await axios.post(endpoint);
+                                break;
+                            case 'put':
+                                response = await axios.put(endpoint);
+                                break;
+                            case 'delete':
+                                response = await axios.delete(endpoint);
+                                break;
+                            case 'get':
+                            default:
+                                response = await axios.get(endpoint);
+                                break;
+                        }
+
+                        this.responseData = `${response.status} ${response.statusText}`;
+                        this.loadQueries();
+                    } catch (error) {
+                        console.error(`${method.toUpperCase()} Error:`, error);
+                    }
+                },
+
+                getDurationBarColor(p95) {
+                    if (p95 > this.maxDuration * 0.75) {
+                        return '#ff5555'; // Red for long queries
+                    } else if (p95 > this.maxDuration * 0.5) {
+                        return '#ffbf00'; // Yellow for moderate queries
+                    }
+                    return ''; // Default (no color or add a default)
+                },
+                async loadQueries() {
+                    try {
+                        const response = await axios.request({
+                            method: 'get',
+                            url: "/query-log",
+                            headers: {
+                                'accept': 'application/json'
+                            },
+                        });
+
+                        this.summaries = response.data.summaries;
+                    } catch (error) {
+                        console.error('Failed to load queries:', error);
+                    }
+                },
+                async purgeQueries() {
+                    this.loadQuery('/query-log', 'delete');
+                }
             }
         });
-
-
-        // Make a request for a user with a given ID
-        axios.request({
-            method: 'get',
-            url: "/query-log",
-            headers: {
-                'accept': 'application/json'
-            },
-        }).then(function(response) {
-            // handle success
-            console.log(response.data);
-        })
-        .catch(function(error) {
-            // handle error
-            console.log(error);
-        })
-        .finally(function() {
-            // always executed
-        });
-
     </script>
 </body>
 
