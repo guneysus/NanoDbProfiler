@@ -1,6 +1,7 @@
 ﻿
 namespace NanoDbProfiler.AspNetCore;
 
+
 public struct DashboardData
 {
     public List<MetricSummary> Summaries { get; set; }

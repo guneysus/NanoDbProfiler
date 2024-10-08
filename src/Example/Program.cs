@@ -10,11 +10,15 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
 
         builder.Services
-            .AddDbContext<TodoContext>(o => o.UseSqlite("Data Source=db.sqlite"))
+            .AddDbContext<TodoContext>(o => o
+                .UseSqlite("Data Source=db.sqlite")
+                .AddInterceptors(new NanoDbProfilerEfCoreQueryInterceptor()))
             .AddNanoDbProfiler();
 
         var app = builder.Build();
-        app.UseNanodbProfilerToolbar();
+        app
+            .UseNanoDbProfilerPage()
+            .UseNanoDbProfilerToolbar();
 
         app.MapGet("/", async (HttpContext h, [FromServices] TodoContext db) =>
         {

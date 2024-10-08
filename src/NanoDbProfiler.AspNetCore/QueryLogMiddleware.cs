@@ -2,6 +2,8 @@
 
 public class QueryLogMiddleware
 {
+    public static string? QUERY_LOG_ROUTE;
+
     private readonly RequestDelegate _next;
 
     public QueryLogMiddleware(RequestDelegate next)
@@ -15,7 +17,7 @@ public class QueryLogMiddleware
         {
             var path = context.Request.Path;
 
-            if (path == "/query-log")
+            if (path == QUERY_LOG_ROUTE)
             {
                 await _next(context);
                 return;

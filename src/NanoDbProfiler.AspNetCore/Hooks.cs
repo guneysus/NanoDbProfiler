@@ -52,7 +52,7 @@ public static class Hooks
 #endif
         };
 
-        EfQueryLog.AddMetric(metric);
+        EfQueryLog.Add(metric);
     }
 
     public static void ExecuteReaderPostfix(object __instance,
@@ -106,7 +106,7 @@ public static class Hooks
 #endif
         };
 
-        EfQueryLog.AddMetric(metric);
+        EfQueryLog.Add(metric);
     }
 }
 

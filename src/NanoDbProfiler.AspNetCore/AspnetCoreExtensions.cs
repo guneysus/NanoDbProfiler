@@ -4,16 +4,16 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class AspnetCoreExtensions
 {
-    public static IServiceCollection AddNanoDbProfiler(this IServiceCollection s)
+    public static IServiceCollection AddNanoDbProfiler(this IServiceCollection _)
     {
+        return _;
+
         const string EfCoreRelationalAssemblyString = "Microsoft.EntityFrameworkCore.Relational";
         const string DiagnosticLoggerFullname = "Microsoft.EntityFrameworkCore.Diagnostics.Internal.RelationalCommandDiagnosticsLogger";
         const string DiagnosticLoggerInterfaceName = "IRelationalCommandDiagnosticsLogger";
 
         var efCoreRelationalAsm = Assembly.Load(EfCoreRelationalAssemblyString);
         ArgumentNullException.ThrowIfNull(efCoreRelationalAsm);
-
-        s.AddSingleton<EfCoreMetrics>();
 
         var h = new Harmony("id");
 
@@ -57,7 +57,7 @@ public static class AspnetCoreExtensions
             prefix: new HarmonyMethod(typeof(Hooks).GetMethod(nameof(Hooks.ExecuteReaderPrefix))),
             postfix: new HarmonyMethod(typeof(Hooks).GetMethod(nameof(Hooks.ExecuteReaderPostfix))));
 
-        return s;
+        return _;
     }
 
     private static void patch(string name, IEnumerable<MethodInfo> methods, Harmony harmony, HarmonyMethod prefix, HarmonyMethod postfix)
@@ -77,14 +77,15 @@ public static class AspnetCoreExtensions
         ArgumentNullException.ThrowIfNull(replacement);
     }
 
-    public static WebApplication UseNanodbProfilerToolbar(this WebApplication app, string route = "query-log")
+    public static WebApplication UseNanoDbProfilerPage(this WebApplication app, string route = "query-log")
     {
-        app.UseMiddleware<QueryLogMiddleware>();
+        QueryLogMiddleware.QUERY_LOG_ROUTE = "/" + route;
 
         EfQueryLog.ServiceScopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
 
-        app.MapGet(route, ([FromServices] EfCoreMetrics metrics, HttpRequest h) =>
+        app.MapGet(route, (HttpRequest h) =>
         {
+            var metrics = EfCoreMetrics.GetInstance();
             MediaTypeHeaderValue.TryParseList(h.Headers["Accept"], out var accept);
 
             IResult resp = accept switch
@@ -99,8 +100,10 @@ public static class AspnetCoreExtensions
             return resp;
         });
 
-        app.MapDelete(route, ([FromServices] EfCoreMetrics metrics, HttpRequest h) =>
+        app.MapDelete(route, (HttpRequest h) =>
         {
+            var metrics = EfCoreMetrics.GetInstance();
+
             metrics.Clear();
             return Results.NoContent();
         });
@@ -108,4 +111,6 @@ public static class AspnetCoreExtensions
 
         return app;
     }
+
+    public static void UseNanoDbProfilerToolbar(this WebApplication app) => app.UseMiddleware<QueryLogMiddleware>();
 }
