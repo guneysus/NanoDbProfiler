@@ -67,12 +67,16 @@
             border-radius: 5px;
             margin-top: 5px;
         }
+
+        #toolbar {
+            margin-bottom: 1em;
+        }
     </style>
 </head>
 <body>
 
     <div id="app">
-        <div>
+        <div id="toolbar">
             <h2>NanoDB Profiler & Sample Queries</h2>
             <button @click="loadQueries">Refresh</button>
             <button @click="purgeQueries">Clean</button>
@@ -86,7 +90,7 @@
             <div v-if="responseData">
                 <h3>Response:</h3>
                 <b>{{ responseStatus }}</b>
-                <b>{{ responseData }}</b>
+                <div v-html="responseData"></div>
             </div>
 
         </div>
@@ -180,6 +184,8 @@
                         this.responseData = response.data;
                         this.loadQueries();
                     } catch (error) {
+                        this.responseStatus = `${error.response.status} ${error.response.statusText}`;
+                        this.responseData = error.response.data;
                         console.error(`${method.toUpperCase()} Error:`, error);
                     }
                 },

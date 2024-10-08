@@ -5,16 +5,22 @@ namespace Example;
 
 public class Program
 {
-    public static void Main(string[] args)
+    public static void Main(string [] args)
     {
         var builder = WebApplication.CreateBuilder(args);
 
         builder.Services
-            .AddDbContext<TodoContext>(o => o.UseSqlite("Data Source=db.sqlite"))
-            .AddNanoDbProfiler();
+            .AddDbContext<TodoContext>(o => o
+                .UseSqlite("Data Source=db.sqlite")
+                .AddNanoDbProfilerEfCoreInterceptor())
+
+            .AddNanoDbProfiler()
+            ;
 
         var app = builder.Build();
-        app.UseNanodbProfilerToolbar();
+        app
+            .UseNanoDbProfilerPage()
+            .UseNanoDbProfilerToolbar();
 
         app.MapGet("/", async (HttpContext h, [FromServices] TodoContext db) =>
         {
@@ -24,9 +30,14 @@ public class Program
 
         app.MapGet("/insert", (HttpContext h, [FromServices] TodoContext db) =>
         {
-            var e = new Todo { Title = Guid.NewGuid().ToString() };
+            var e = new Todo
+            {
+                Title = Guid.NewGuid().ToString()
+            };
+            
             db.Todos.Add(e);
             db.SaveChanges();
+
             return Results.Ok(e.Title);
         });
 
@@ -74,6 +85,14 @@ public class Program
             return Results.Ok();
         });
 
+        app
+            .Services
+            .CreateScope()
+            .ServiceProvider
+            .GetRequiredService<TodoContext>()
+            .Database
+            .EnsureCreated();
+        
         app.Run();
     }
 }

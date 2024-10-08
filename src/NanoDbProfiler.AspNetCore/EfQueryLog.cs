@@ -4,17 +4,9 @@ public static class EfQueryLog
 {
     public static IServiceScopeFactory? ServiceScopeFactory { get; internal set; }
 
-    public static EfCoreMetrics GetMetricsDb()
+    public static void Add(Metric metric)
     {
-        ArgumentNullException.ThrowIfNull(ServiceScopeFactory);
-        using var scope = ServiceScopeFactory.CreateScope();
-        return scope.ServiceProvider.GetRequiredService<EfCoreMetrics>();
-    }
-
-    public static void AddMetric(Metric metric)
-    {
-        EfCoreMetrics? metrics = GetMetricsDb();
-        metrics.Add(metric);
+        EfCoreMetrics.GetInstance().Add(metric);
     }
 
     internal static IResult HtmlResult(EfCoreMetrics metrics)
@@ -25,7 +17,7 @@ public static class EfQueryLog
         return Results.Text(pageHtml, "text/html");
     }
 
-    internal static IResult JsonResult(EfCoreMetrics metrics) => Results.Json(new DashboardData(GetMetricsDb().Data));
+    internal static IResult JsonResult(EfCoreMetrics metrics) => Results.Json(new DashboardData(metrics.Data));
 
     internal static IResult TextResult(EfCoreMetrics metrics) => Results.Text(TextRepr(new DashboardData(metrics.Data)));
 
