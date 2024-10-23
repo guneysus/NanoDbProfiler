@@ -3,12 +3,9 @@ using System.Data.Common;
 
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
-using NanoDbProfiler.AspNetCore;
+namespace NanoDbProfiler.AspNetCore;
 
-namespace Example;
-
-
-internal class NanoDbProfilerEfCoreQueryInterceptor : DbCommandInterceptor
+public class NanoDbProfilerEfCoreQueryInterceptor : DbCommandInterceptor
 {
     private static Metric metricFactory(CommandExecutedEventData eventData)
     {

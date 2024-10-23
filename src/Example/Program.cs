@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
+using NanoDbProfiler.AspNetCore;
+
 namespace Example;
 
 public class Program
