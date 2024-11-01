@@ -6,12 +6,48 @@ function Init {
 	winget install --id Microsoft.NuGet
 }
 
+function Get-Version {
+	dotnet restore .\src\NanoDbProfiler.AspNetCore\NanoDbProfiler.AspNetCore.csproj --use-lock-file | Out-Null
+
+	# Define the path to the packages.lock.json file
+	$filePath = ".\src\NanoDbProfiler.AspNetCore\packages.lock.json"
+
+	# Check if the file exists
+	if (Test-Path $filePath) {
+		# Read and parse the JSON content
+		$jsonContent = Get-Content -Path $filePath -Raw | ConvertFrom-Json
+
+		# Navigate to the net8.0 dependencies and find Microsoft.EntityFrameworkCore.Relational
+		$dependency = $jsonContent.dependencies."net8.0"."Microsoft.EntityFrameworkCore.Relational"
+
+		if ($dependency -ne $null) {
+			# Extract and display the resolved version
+			$version = $dependency.resolved
+			Write-Output $version
+		}
+		else {
+			Write-Error "Microsoft.EntityFrameworkCore.Relational dependency not found in packages.lock.json"
+		}
+	}
+	else {
+		Write-Error "File not found: $filePath"
+	}
+
+}
+
+function Patch-Version {
+	dotnet nbgv set-version $(pake get-version)
+
+}
+
 function Build {
-  . "${msbuild}" /bl `
+
+
+	. "${msbuild}" /bl `
 		.\src\NanoDbProfiler.AspNetCore\NanoDbProfiler.AspNetCore.csproj `
 		-p:Configuration=Release `
 		"/t:Clean;Build" `
-		 -p:Deterministic=true
+		-p:Deterministic=true
 }
 
 function Publish {
