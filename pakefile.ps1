@@ -54,14 +54,19 @@ function Build {
 	# dotnet build .\src\NanoDbProfiler.AspNetCore\NanoDbProfiler.AspNetCore.csproj /p:PublicRelease=true
 }
 
+function Pack {
+	dotnet pack .\src\NanoDbProfiler.AspNetCore\NanoDbProfiler.AspNetCore.csproj -o dist/ --no-build --configuration Release	
+}
+
+
 function Publish {
 	# nbgv prepare-release
 	dotnet restore src/NanoDbProfiler.sln
 	# dotnet build src/NanoDbProfiler.sln --configuration Release
 	Build
-	dotnet pack .\src\NanoDbProfiler.AspNetCore\NanoDbProfiler.AspNetCore.csproj -o dist/ --no-build --configuration Release
+	Pack
 	dotnet nuget push `
-		"dist/NanoDbProfiler.AspNetCore.$(nbgv get-version -v Version).nupkg" `
+		"dist/NanoDbProfiler.AspNetCore.$(nbgv get-version -v NuGetPackageVersion).nupkg" `
 		--source https://www.myget.org/F/guneysu/api/v2/package --api-key=$env:MYGET_API_KEY
 }
 
