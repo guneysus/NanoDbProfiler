@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <PackageId>NanoDbProfiler.AspNetCore</PackageId>
-        <Version>$(GitVersion_NuGetVersion)</Version>
+        <Version>$(GitVersion_Version)</Version>
         <Authors>Ahmed Guneysu</Authors>
         <Description>EF Core Profiling for ASP.Net Core</Description>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
