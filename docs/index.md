@@ -2,6 +2,8 @@
 
 # NanoDbProfiler for EF Core 8.x
 
+<a href='https://github.com/guneysus/NanoDbProfiler'>Fork me on GitHub</a>
+
 
 ## Install
 
