@@ -16,6 +16,7 @@
         <IncludeSymbols>False</IncludeSymbols>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
         <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
+        <Deterministic>true</Deterministic>
     </PropertyGroup>
 
 

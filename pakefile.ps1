@@ -43,11 +43,13 @@ function Patch-Version {
 function Build {
 
 
-	. "${msbuild}" /bl `
-		.\src\NanoDbProfiler.AspNetCore\NanoDbProfiler.AspNetCore.csproj `
-		-p:Configuration=Release `
-		"/t:Clean;Build" `
-		-p:Deterministic=true
+	# . "${msbuild}" /bl `
+	# 	.\src\NanoDbProfiler.AspNetCore\NanoDbProfiler.AspNetCore.csproj `
+	# 	-p:Configuration=Release `
+	# 	"/t:Clean;Build" `
+	# 	-p:Deterministic=true
+
+	dotnet build .\src\NanoDbProfiler.AspNetCore\NanoDbProfiler.AspNetCore.csproj
 }
 
 function Publish {
