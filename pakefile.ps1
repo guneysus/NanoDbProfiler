@@ -59,7 +59,7 @@ function Publish {
 	Build
 	dotnet pack src/NanoDbProfiler.sln -o dist/ --no-build --configuration Release
 	dotnet nuget push `
-		"dist/NanoDbProfiler.AspNetCore.$(nbgv get-version -v NuGetPackageVersion).nupkg" `
+		"dist/NanoDbProfiler.AspNetCore.$(nbgv get-version -v Version).nupkg" `
 		--source https://www.myget.org/F/guneysu/api/v2/package --api-key=$env:MYGET_API_KEY
 }
 
