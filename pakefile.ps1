@@ -1,4 +1,5 @@
 $msbuild = "C:\Program Files\Microsoft Visual Studio\2022\Community\\MSBuild\Current\Bin\amd64\MSBuild.exe"
+$msbuild = "C:\Program Files\Microsoft Visual Studio\2022\Preview\\MSBuild\Current\Bin\amd64\MSBuild.exe"
 
 function Init {
 	# dotnet tool install -g nbgv
@@ -43,13 +44,14 @@ function Patch-Version {
 function Build {
 
 
-	# . "${msbuild}" /bl `
-	# 	.\src\NanoDbProfiler.AspNetCore\NanoDbProfiler.AspNetCore.csproj `
-	# 	-p:Configuration=Release `
-	# 	"/t:Clean;Build" `
-	# 	-p:Deterministic=true
+	. "${msbuild}" /bl `
+		.\src\NanoDbProfiler.AspNetCore\NanoDbProfiler.AspNetCore.csproj `
+		-p:Configuration=Release `
+		"/t:Clean;Build" `
+		"/p:PublicRelease=true" `
+		-p:Deterministic=true
 
-	dotnet build .\src\NanoDbProfiler.AspNetCore\NanoDbProfiler.AspNetCore.csproj /p:PublicRelease=true
+	# dotnet build .\src\NanoDbProfiler.AspNetCore\NanoDbProfiler.AspNetCore.csproj /p:PublicRelease=true
 }
 
 function Publish {
@@ -57,7 +59,7 @@ function Publish {
 	dotnet restore src/NanoDbProfiler.sln
 	# dotnet build src/NanoDbProfiler.sln --configuration Release
 	Build
-	dotnet pack src/NanoDbProfiler.sln -o dist/ --no-build --configuration Release
+	dotnet pack .\src\NanoDbProfiler.AspNetCore\NanoDbProfiler.AspNetCore.csproj -o dist/ --no-build --configuration Release
 	dotnet nuget push `
 		"dist/NanoDbProfiler.AspNetCore.$(nbgv get-version -v Version).nupkg" `
 		--source https://www.myget.org/F/guneysu/api/v2/package --api-key=$env:MYGET_API_KEY
