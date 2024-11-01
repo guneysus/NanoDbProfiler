@@ -60,7 +60,6 @@ function Pack {
 
 function Publish {
 	dotnet tool restore
-	dotnet tool run nbgv
 	dotnet  tool run nbgv set-version $(pake get-version)
 
 	# nbgv prepare-release
