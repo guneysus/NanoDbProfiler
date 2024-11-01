@@ -3,5 +3,8 @@
   "version": "8.0.10",
   "release": {
     "branchName": "release/v{version}"
-  }
+  },
+  "publicReleaseRefSpec": [
+    "^refs/heads/master$"
+]
 }

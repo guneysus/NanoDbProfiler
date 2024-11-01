@@ -49,7 +49,7 @@ function Build {
 	# 	"/t:Clean;Build" `
 	# 	-p:Deterministic=true
 
-	dotnet build .\src\NanoDbProfiler.AspNetCore\NanoDbProfiler.AspNetCore.csproj
+	dotnet build .\src\NanoDbProfiler.AspNetCore\NanoDbProfiler.AspNetCore.csproj /p:PublicRelease=true
 }
 
 function Publish {
