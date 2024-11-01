@@ -38,7 +38,6 @@ function Get-Version {
 
 function Patch-Version {
 	dotnet nbgv set-version $(pake get-version)
-
 }
 
 function Build {
@@ -60,6 +59,10 @@ function Pack {
 
 
 function Publish {
+	dotnet tool restore
+	dotnet tool run nbgv
+	dotnet  tool run nbgv set-version $(pake get-version)
+
 	# nbgv prepare-release
 	dotnet restore src/NanoDbProfiler.sln
 	# dotnet build src/NanoDbProfiler.sln --configuration Release
