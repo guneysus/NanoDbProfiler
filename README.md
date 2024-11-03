@@ -1,10 +1,6 @@
 # Entity Framework Profiler for ASP.Net Core
 
 
-A tiny profiler without hassle. 
-![screenshot](./docs/img/chrome_qKlLJE0ANE.png)
-
-
 ```
 ┌────────────────────────────────────────────────────────────────────────────────┐
 │                                                                                │
@@ -34,6 +30,11 @@ A tiny profiler without hassle.
 │                                                                                │
 └────────────────────────────────────────────────────────────────────────────────┘
 ```
+
+
+A tiny profiler without hassle. 
+![screenshot](./docs/img/chrome_qKlLJE0ANE.png)
+
 
 ## Installation
 
