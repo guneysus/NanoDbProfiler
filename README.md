@@ -39,7 +39,7 @@ A tiny profiler without hassle.
 ## Installation
 
 ```
-dotnet add package NanoDbProfiler.AspNetCore --version 0.1.23-alpha-g1a0a4554d2 --source https://www.myget.org/F/guneysu/api/v3/index.json 
+dotnet add package NanoDbProfiler.AspNetCore --version 8.0.10 --source https://www.myget.org/F/guneysu/api/v3/index.json 
 ```
 
 ```csharp
