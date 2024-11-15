@@ -16,7 +16,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             var h = new Harmony("id");
 
-            Assembly [] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
             var diagnosticsLoggerTypes = (
                 from t in assemblies.SelectMany(t => t.GetTypes())
@@ -28,14 +28,14 @@ namespace Microsoft.Extensions.DependencyInjection
                 where asm.GetName().Name == EfCoreRelationalAssemblyString
                 select asm).Single();
 
-            Type [] efCoreRelationalTypes = efCoreRelationAsm.GetTypes();
+            Type[] efCoreRelationalTypes = efCoreRelationAsm.GetTypes();
 
             var diagnosticsLoggerType = (
                 from t in efCoreRelationalTypes
                 where t.FullName == DiagnosticLoggerFullname
                 select t).Single();
 
-            MethodInfo [] diagnosticsLoggerMethods = diagnosticsLoggerType.GetMethods(AccessTools.all);
+            MethodInfo[] diagnosticsLoggerMethods = diagnosticsLoggerType.GetMethods(AccessTools.all);
 
             var diagLoggerMethods = (
                 from m in diagnosticsLoggerMethods
@@ -76,6 +76,11 @@ namespace Microsoft.Extensions.DependencyInjection
             ArgumentNullException.ThrowIfNull(replacement);
         }
 
+        public static IApplicationBuilder UseNanoDbProfilerPage(this IApplicationBuilder builder, string route = "query-log")
+        {
+            throw new NotImplementedException();
+        }
+
         public static WebApplication UseNanoDbProfilerPage(this WebApplication app, string route = "query-log")
         {
             QueryLogMiddleware.QUERY_LOG_ROUTE = "/" + route;
@@ -85,7 +90,7 @@ namespace Microsoft.Extensions.DependencyInjection
             app.MapGet(route, (HttpRequest h) =>
             {
                 var metrics = EfCoreMetrics.GetInstance();
-                MediaTypeHeaderValue.TryParseList(h.Headers ["Accept"], out var accept);
+                MediaTypeHeaderValue.TryParseList(h.Headers["Accept"], out var accept);
 
                 IResult resp = accept switch
                 {
