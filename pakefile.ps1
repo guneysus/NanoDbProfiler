@@ -1,5 +1,5 @@
-$msbuild = "C:\Program Files\Microsoft Visual Studio\2022\Community\\MSBuild\Current\Bin\amd64\MSBuild.exe"
-$msbuild = "C:\Program Files\Microsoft Visual Studio\2022\Preview\\MSBuild\Current\Bin\amd64\MSBuild.exe"
+$msbuild = "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\amd64\MSBuild.exe"
+$msbuild = "C:\Program Files\Microsoft Visual Studio\2022\Preview\MSBuild\Current\Bin\amd64\MSBuild.exe"
 
 function Init {
 	# dotnet tool install -g nbgv
@@ -41,7 +41,6 @@ function Patch-Version {
 }
 
 function Build {
-
 
 	. "${msbuild}" /bl `
 		.\src\NanoDbProfiler.AspNetCore\NanoDbProfiler.AspNetCore.csproj `
