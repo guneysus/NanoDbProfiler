@@ -30,7 +30,7 @@ internal class NanoDbProfilerEfCoreQueryInterceptor
         if (commandProperty != null)
         {
             var command = commandProperty.GetValue(eventData); // Get the value of the Command property
-            if (command is System.Data.Common.DbCommand dbCommand)
+            if (command is DbCommand dbCommand)
             {
                 metric.Query = dbCommand.CommandText; // Extract the CommandText from the DbCommand
             }
@@ -39,7 +39,7 @@ internal class NanoDbProfilerEfCoreQueryInterceptor
         return metric;
     }
 
-    public int NonQueryExecuted(System.Data.Common.DbCommand command, object eventData, int result)
+    public int NonQueryExecuted(DbCommand command, object eventData, int result)
     {
         // Use reflection to pass the eventData to the metric factory
         var metric = metricFactory(eventData);
@@ -50,7 +50,6 @@ internal class NanoDbProfilerEfCoreQueryInterceptor
         // Return the result directly without calling base method
         return result;
     }
-
 
     public ValueTask<int> NonQueryExecutedAsync(DbCommand command, object eventData, int result, CancellationToken cancellationToken = default)
     {
