@@ -4,6 +4,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <Deterministic>true</Deterministic>
+		<EfCoreRelationPackage>8.0.11</EfCoreRelationPackage>
 	<GitVersionBaseDirectory>$(MSBuildThisFileDirectory)</GitVersionBaseDirectory>
     </PropertyGroup>
     <ItemGroup>
