@@ -20,7 +20,7 @@ public class Program
 
         app.UseNanoDbProfiler(x =>
         {
-            x.ToolbarEnabled = false;
+            x.ToolbarEnabled = true;
             x.ProfilerPageUrl = "query-log";
         });
 
