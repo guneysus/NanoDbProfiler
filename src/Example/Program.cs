@@ -17,10 +17,22 @@ public class Program
             ;
 
         var app = builder.Build();
-        app
-            .UseNanoDbProfilerPage()
-            .UseNanoDbProfilerToolbar()
-            ;
+
+        app.UseNanoDbProfiler(x =>
+        {
+            x.ToolbarEnabled = false;
+            x.ProfilerPageUrl = "query-log";
+        });
+
+#if ALTERNATIVES
+        app.UseNanoDbProfiler(x =>
+        {
+            x.ToolbarEnabled = true;
+            x.ProfilerPageUrl = "query-log";
+        });
+
+        app.UseNanoDbProfiler(x => x.ToolbarEnabled = true); 
+#endif
 
         app.MapGet("/", async (HttpContext h, [FromServices] TodoContext db) =>
         {

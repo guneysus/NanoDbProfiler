@@ -2,6 +2,9 @@
 
 public static class AspnetCoreExtensions
 {
+    private static bool _routeConfigured;
+    private static bool _toolbarMiddlewareRegistered;
+
     public static IServiceCollection AddNanoDbProfiler(this IServiceCollection _)
     {
         const string EfCoreRelationalAssemblyString = "Microsoft.EntityFrameworkCore.Relational";
@@ -73,11 +76,30 @@ public static class AspnetCoreExtensions
         ArgumentNullException.ThrowIfNull(replacement);
     }
 
-    public static WebApplication UseNanoDbProfilerPage(this WebApplication app, string route = "query-log")
+    public static WebApplication UseNanoDbProfiler(this WebApplication app, Action<NanoDbProfilerConfiguration> config = default)
     {
+        var nanoDbProfilerConfiguration = new NanoDbProfilerConfiguration();
+        if (config != null) config(nanoDbProfilerConfiguration);
+
+        if (!_toolbarMiddlewareRegistered && nanoDbProfilerConfiguration.ToolbarEnabled)
+        {
+            app.UseMiddleware<QueryLogMiddleware>();
+            _toolbarMiddlewareRegistered = true;
+        }
+
+        configureProfilerPage(app, nanoDbProfilerConfiguration.ProfilerPageUrl);
+
+        return app;
+    }
+
+    static WebApplication configureProfilerPage(this WebApplication app, string route)
+    {
+        if (_routeConfigured) return app;
+
         QueryLogMiddleware.QUERY_LOG_ROUTE = "/" + route;
 
         EfQueryLog.ServiceScopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
+
 
         app.MapGet(route, (HttpRequest h) =>
         {
@@ -104,9 +126,14 @@ public static class AspnetCoreExtensions
             return Results.NoContent();
         });
 
+        _routeConfigured = true;
 
         return app;
     }
+}
 
-    public static void UseNanoDbProfilerToolbar(this WebApplication app) => app.UseMiddleware<QueryLogMiddleware>();
+public class NanoDbProfilerConfiguration
+{
+    public bool ToolbarEnabled { get; set; }
+    public string ProfilerPageUrl { get; set; } = "query-log";
 }
