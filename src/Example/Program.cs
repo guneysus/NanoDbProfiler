@@ -8,21 +8,32 @@ public class Program
     public static void Main(string [] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-
+        
+        builder.Services.AddRazorPages();
+        
         builder.Services
             .AddDbContext<TodoContext>(o => o
                 .UseSqlite("Data Source=db.sqlite"))
 
-            .AddNanoDbProfiler()
+#if NANODBPROFILER
+                    .AddNanoDbProfiler()
+#endif            
             ;
 
         var app = builder.Build();
 
+#if NANODBPROFILER
         app.UseNanoDbProfiler(x =>
         {
             x.ToolbarEnabled = true;
             x.ProfilerPageUrl = "query-log";
         });
+#endif
+
+
+#if EFCORE_PROFILER_TOOLBAR
+        app.UseEfCoreQueryToolbar();
+#endif
 
 #if ALTERNATIVES
         app.UseNanoDbProfiler(x =>
@@ -34,10 +45,14 @@ public class Program
         app.UseNanoDbProfiler(x => x.ToolbarEnabled = true); 
 #endif
 
+        app.UseRouting();
+
+        app.MapRazorPages();
+
         app.MapGet("/", async (HttpContext h, [FromServices] TodoContext db) =>
         {
             await db.Database.EnsureCreatedAsync();
-            return Results.Text("Hello World!", "text/html");
+            return Results.Text("<div>Hello World!</div>", "text/html; charset=utf-8");
         });
 
         app.MapGet("/insert", (HttpContext h, [FromServices] TodoContext db) =>
@@ -97,13 +112,11 @@ public class Program
             return Results.Ok();
         });
 
-        app
-            .Services
-            .CreateScope()
-            .ServiceProvider
-            .GetRequiredService<TodoContext>()
-            .Database
-            .EnsureCreated();
+        using (var scope = app.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<TodoContext>();
+            db.Database.EnsureCreated();
+        }
         
         app.Run();
     }

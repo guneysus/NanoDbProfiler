@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
@@ -17,8 +17,14 @@
         <PackageReference Include="System.Text.Json" Version="8.0.*" />
     </ItemGroup>
 
-    <ItemGroup>
+
+    <ItemGroup Condition="$(DefineConstants.Contains('NANODBPROFILER'))">
       <ProjectReference Include="..\NanoDbProfiler.AspNetCore\NanoDbProfiler.AspNetCore.csproj" />
     </ItemGroup>
+
+    <ItemGroup Condition="$(DefineConstants.Contains('EFCORE_PROFILER_TOOLBAR'))">
+        <ProjectReference Include="..\..\..\github.com\guneysus\EfCoreQueryToolbar.git\src\EfCoreQueryToolbar\EfCoreQueryToolbar.csproj" />
+    </ItemGroup>
+
 
 </Project>
