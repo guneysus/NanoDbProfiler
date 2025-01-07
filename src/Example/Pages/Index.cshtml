@@ -4,4 +4,232 @@
 }
 
 
-<h1>Hello!</h1>
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>NanoDbProfiler for Entity Framework Core</title>
+    <!-- development version, includes helpful console warnings -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <style>
+
+        /* General scrollbar styling for the page */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #333;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background-color: #555;
+            border-radius: 4px;
+        }
+
+            ::-webkit-scrollbar-thumb:hover {
+                background-color: #777;
+            }
+
+        /* Toolbar scrollbar styling */
+        #query-log::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #query-log::-webkit-scrollbar-track {
+            background: #222;
+        }
+
+        #query-log::-webkit-scrollbar-thumb {
+            background-color: #555;
+            border-radius: 4px;
+        }
+
+            #query-log::-webkit-scrollbar-thumb:hover {
+                background-color: #777;
+            }
+
+        /* Style for visually separating records */
+        .query-record {
+            border: 1px solid #555;
+            padding: 0 8px 8px 8px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            /* background-color: #2c2c2c; */
+            position: relative;
+        }
+
+        /* Duration bar styling */
+        .duration-bar {
+            height: 10px;
+            background-color: #4CAF50;
+            /* Default color for short queries */
+            border-radius: 5px;
+            margin-top: 5px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="app">
+        <div id="dev-toolbar">
+            <h2>NanoDB Profiler & Sample Queries</h2>
+            <button onclick="loadQueries()">Refresh</button>
+            <button onclick="purgeQueries()">Clean</button>
+            <button onclick="loadQuery(urlSelect.value)">Repeat</button>
+            
+            <label for="urlSelect">Choose an endpoint:</label>
+            <select id="urlSelect" onchange="loadQuery(this.value)">
+                <!-- URLs will be populated by JavaScript -->
+            </select>
+
+            <div id="responseContainer" style="display: none;">
+                <h3>Response:</h3>
+                <b id="responseStatus"></b>
+                <div id="responseData"></div>
+            </div>
+        </div>
+
+        <div id="queryList" class="query-list">
+            <!-- Query records will be populated here -->
+        </div>
+    </div>
+
+    <script>
+        const urls = [
+                     '/insert',
+                    '/update',
+                    '/select/single/1',
+                    '/select/single/2',
+                    '/select/all',
+                    '/select/scalar',
+                    '/select/max-id',
+                    '/select/count',
+                    '/select/sum',
+                    '/select/orderby-desc',
+                    '/select/avg',
+                    '/select/starts-with',
+                    '/select/ends-with',
+                    '/select/contains',
+                    '/select/distinct-by',
+                    '/select/find',
+                    '/delete/single',
+                    '/delete/all'
+
+        ];
+
+        // Populate select options
+        const urlSelect = document.getElementById('urlSelect');
+        urls.forEach(url => {
+            const option = document.createElement('option');
+            option.value = url;
+            option.textContent = url;
+            urlSelect.appendChild(option);
+        });
+
+        let summaries = [];
+
+        function getMaxDuration() {
+            if (summaries.length === 0) return 0;
+            return Math.max(...summaries.map(s => s.p95));
+        }
+
+        function getDurationBarColor(p95) {
+            const maxDuration = getMaxDuration();
+            if (p95 > maxDuration * 0.75) {
+                return '#ff5555';
+            } else if (p95 > maxDuration * 0.5) {
+                return '#ffbf00';
+            }
+            return '';
+        }
+
+        async function loadQuery(endpoint, method = 'get') {
+            try {
+                let response;
+                switch (method.toLowerCase()) {
+                    case 'post':
+                        response = await axios.post(endpoint);
+                        break;
+                    case 'put':
+                        response = await axios.put(endpoint);
+                        break;
+                    case 'delete':
+                        response = await axios.delete(endpoint);
+                        break;
+                    case 'get':
+                    default:
+                        response = await axios.get(endpoint);
+                        break;
+                }
+
+                const responseContainer = document.getElementById('responseContainer');
+                const responseStatus = document.getElementById('responseStatus');
+                const responseData = document.getElementById('responseData');
+
+                responseContainer.style.display = 'block';
+                responseStatus.textContent = `${response.status} ${response.statusText}`;
+                responseData.innerHTML = response.data;
+                loadQueries();
+            } catch (error) {
+                console.error(`${method.toUpperCase()} Error:`, error);
+                responseStatus.textContent = `${error.response.status} ${error.response.statusText}`;
+                responseData.innerHTML = error.response.data;
+            }
+        }
+
+        async function loadQueries() {
+            try {
+                const response = await axios.request({
+                    method: 'get',
+                    url: "/query-log",
+                    headers: {
+                        'accept': 'application/json'
+                    },
+                });
+
+                summaries = response.data.summaries;
+                renderQueries();
+            } catch (error) {
+                console.error('Failed to load queries:', error);
+            }
+        }
+
+        function renderQueries() {
+            const queryList = document.getElementById('queryList');
+            queryList.innerHTML = '';
+            const maxDuration = getMaxDuration();
+
+            summaries.forEach(summary => {
+                const queryRecord = document.createElement('div');
+                queryRecord.className = 'query-record';
+                queryRecord.innerHTML = `
+                    <pre>${summary.query}</pre>
+                    <div class="duration-bar" style="
+                        background-color: ${getDurationBarColor(summary.p95)};
+                        width: ${(summary.p95 / maxDuration * 100)}%">
+                    </div>
+                    <div class="query-details">
+                        <span>Total Count: ${summary.total}</span>
+                        <span>Duration: ${summary.p95.toFixed(3)}ms</span>
+                    </div>
+                `;
+                queryList.appendChild(queryRecord);
+            });
+        }
+
+        async function purgeQueries() {
+            await loadQuery('/query-log', 'delete');
+        }
+
+        // Initial load
+        loadQueries();
+    </script>
+</body>
+
+</html>

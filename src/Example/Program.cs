@@ -10,14 +10,15 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
         
         builder.Services.AddRazorPages();
-        
         builder.Services
             .AddDbContext<TodoContext>(o => o
                 .UseSqlite("Data Source=db.sqlite"))
 
 #if NANODBPROFILER
-                    .AddNanoDbProfiler()
-#endif            
+                .AddNanoDbProfiler()
+#elif EFCORE_PROFILER_TOOLBAR
+                .AddEfCoreProfilerToolbar()
+#endif
             ;
 
         var app = builder.Build();
@@ -45,11 +46,13 @@ public class Program
         app.UseNanoDbProfiler(x => x.ToolbarEnabled = true); 
 #endif
 
-        app.UseRouting();
+        //app.UseDefaultFiles();
+
+        //app.UseRouting();
 
         app.MapRazorPages();
 
-        app.MapGet("/", async (HttpContext h, [FromServices] TodoContext db) =>
+        app.MapGet("/hello", async (HttpContext h, [FromServices] TodoContext db) =>
         {
             await db.Database.EnsureCreatedAsync();
             return Results.Text("<div>Hello World!</div>", "text/html; charset=utf-8");
@@ -67,6 +70,7 @@ public class Program
 
             return Results.Ok(e.Title);
         });
+
 
         app.MapGet("/select/scalar", (HttpContext h, [FromServices] TodoContext db) => Results.Ok(db.Todos.Select(x => x.Id)));
 

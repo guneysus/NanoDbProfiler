@@ -98,7 +98,7 @@ public static class AspnetCoreExtensions
 
         QueryLogMiddleware.QUERY_LOG_ROUTE = "/" + route;
 
-        EfQueryLog.ServiceScopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
+        QueryLog.ServiceScopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
 
 
         app.MapGet(route, (HttpRequest h) =>
@@ -108,11 +108,11 @@ public static class AspnetCoreExtensions
 
             IResult resp = accept switch
             {
-                null => EfQueryLog.TextResult(metrics),
-                var a when a.Any(x => x.MatchesMediaType("text/html")) => EfQueryLog.HtmlResult(metrics),
-                var a when a.Any(x => x.MatchesMediaType("text/plain")) => EfQueryLog.TextResult(metrics),
-                var a when a.Any(x => x.MatchesMediaType("application/json")) => EfQueryLog.JsonResult(metrics),
-                _ => EfQueryLog.TextResult(metrics)
+                null => QueryLog.TextResult(metrics),
+                var a when a.Any(x => x.MatchesMediaType("text/html")) => QueryLog.HtmlResult(metrics),
+                var a when a.Any(x => x.MatchesMediaType("text/plain")) => QueryLog.TextResult(metrics),
+                var a when a.Any(x => x.MatchesMediaType("application/json")) => QueryLog.JsonResult(metrics),
+                _ => QueryLog.TextResult(metrics)
             };
 
             return resp;
