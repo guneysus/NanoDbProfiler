@@ -31,4 +31,8 @@
         <PackageReference Version="0.0.1-alpha-gde64f9e45e" Include="EfCoreQueryToolbar" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="X:\git\github.com\guneysus\sql-query-profiler\src\DbQueryTracer.EfCore\DbQueryTracer.EfCore.csproj" />
+    </ItemGroup>
+
 </Project>

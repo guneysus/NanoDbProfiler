@@ -1,7 +1,12 @@
+using System.Diagnostics;
+
+using DbQueryTrace;
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Example;
+
 
 public class Program
 {
@@ -12,6 +17,8 @@ public class Program
         builder.Services.AddRazorPages();
         builder.Services
             .AddDbContext<TodoContext>(o => o
+                .AddInterceptors(QueryToolbarInterceptor.DebugLogger())
+                .AddInterceptors(QueryToolbarInterceptor.QueryToolbarLogger())
                 .UseSqlite("Data Source=db.sqlite"))
 
 #if NANODBPROFILER
@@ -33,7 +40,9 @@ public class Program
 
 
 #if EFCORE_PROFILER_TOOLBAR
-        app.UseEfCoreQueryToolbar();
+        app.UseEfCoreQueryToolbar(x => x.DisableOnPaths = new [] {
+            "graphql"
+        });
 #endif
 
 #if ALTERNATIVES
