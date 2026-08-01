@@ -13,54 +13,60 @@ public class QueryLogMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
+        if (!string.IsNullOrEmpty(QUERY_LOG_ROUTE) && context.Request.Path == QUERY_LOG_ROUTE)
+        {
+            await _next(context);
+            return;
+        }
+
+        var originalBodyStream = context.Response.Body;
+        await using var newBodyStream = new MemoryStream();
+        context.Response.Body = newBodyStream;
+
         try
         {
-            var path = context.Request.Path;
-
-            if (path == QUERY_LOG_ROUTE)
-            {
-                await _next(context);
-                return;
-            }
-
-            var originalBodyStream = context.Response.Body;
-            using var newBodyStream = new MemoryStream();
-            context.Response.Body = newBodyStream;
-
+            // Call the next middleware
             await _next(context);
 
-            newBodyStream.Seek(0, SeekOrigin.Begin);
-            var body = await new StreamReader(newBodyStream).ReadToEndAsync();
-
-            // Inject toolbar before closing body tag if the response is HTML
-            if (context.Response.ContentType != null && context.Response.ContentType.Contains("text/html"))
+            // If the response is HTML, modify it
+            if (context.Response.ContentType?.StartsWith("text/html", StringComparison.OrdinalIgnoreCase) == true)
             {
-                string? toolbarHtml = default;
+                newBodyStream.Seek(0, SeekOrigin.Begin);
+                var body = await new StreamReader(newBodyStream).ReadToEndAsync();
 
-                toolbarHtml = EmbeddedResourceHelpers.GetResource("Toolbar.html");
+                var toolbarHtml = EmbeddedResourceHelpers.GetResource("Toolbar.html");
 
-                if (body.Contains("<body>"))
+                if (body.Contains("</body>", StringComparison.OrdinalIgnoreCase))
                 {
-                    body = body.Replace("</body>", $"{toolbarHtml}</body>");
+                    body = body.Replace("</body>", $"{toolbarHtml}</body>", StringComparison.OrdinalIgnoreCase);
                 }
                 else
                 {
                     body += toolbarHtml;
                 }
+
+                var bodyBytes = Encoding.UTF8.GetBytes(body);
+
+                // Reset the response body
+                context.Response.ContentLength = bodyBytes.Length;
+                newBodyStream.SetLength(0);
+                await newBodyStream.WriteAsync(bodyBytes, 0, bodyBytes.Length);
+                await newBodyStream.FlushAsync();
+                newBodyStream.Seek(0, SeekOrigin.Begin);
             }
 
-            context.Response.Body = originalBodyStream;
-            context.Response.Headers.ContentLength = body.Length;
-            await context.Response.WriteAsync(body);
+            // Copy the modified or original response body back to the original stream
+            newBodyStream.Seek(0, SeekOrigin.Begin);
+            await newBodyStream.CopyToAsync(originalBodyStream);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Console.Error.WriteLine($"Error in QueryLogMiddleware: {ex}");
             throw;
         }
         finally
         {
-            if (!context.Response.HasStarted)
-                await _next(context);
+            context.Response.Body = originalBodyStream;
         }
     }
 }

@@ -1,7 +1,4 @@
-﻿
-using System.Data.Common;
-
-//using Microsoft.EntityFrameworkCore.Diagnostics;
+﻿using System.Data.Common;
 
 namespace NanoDbProfiler.AspNetCore;
 
@@ -116,7 +113,6 @@ internal class NanoDbProfilerEfCoreQueryInterceptor
         // Invoke the original method with the parameters and return the result
         return (T) method.Invoke(this, parameters);
     }
-
 
 }
 

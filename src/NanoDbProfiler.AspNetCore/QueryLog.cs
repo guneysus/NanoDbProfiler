@@ -1,6 +1,6 @@
 ﻿namespace Microsoft.Extensions.DependencyInjection;
 
-public static class EfQueryLog
+public static class QueryLog
 {
     public static IServiceScopeFactory? ServiceScopeFactory { get; internal set; }
 

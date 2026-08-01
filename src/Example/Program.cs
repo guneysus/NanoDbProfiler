@@ -1,31 +1,70 @@
+using System.Diagnostics;
+
+using DbQueryTrace;
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Example;
+
 
 public class Program
 {
     public static void Main(string [] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-
+        
+        builder.Services.AddRazorPages();
         builder.Services
             .AddDbContext<TodoContext>(o => o
-                .UseSqlite("Data Source=db.sqlite")
-                .AddNanoDbProfilerEfCoreInterceptor())
+                .AddInterceptors(QueryToolbarInterceptor.DebugLogger())
+                .AddInterceptors(QueryToolbarInterceptor.QueryToolbarLogger())
+                .UseSqlite("Data Source=db.sqlite"))
 
-            .AddNanoDbProfiler()
+#if NANODBPROFILER
+                .AddNanoDbProfiler()
+#elif EFCORE_PROFILER_TOOLBAR
+                .AddEfCoreProfilerToolbar()
+#endif
             ;
 
         var app = builder.Build();
-        app
-            .UseNanoDbProfilerPage()
-            .UseNanoDbProfilerToolbar();
 
-        app.MapGet("/", async (HttpContext h, [FromServices] TodoContext db) =>
+#if NANODBPROFILER
+        app.UseNanoDbProfiler(x =>
+        {
+            x.ToolbarEnabled = true;
+            x.ProfilerPageUrl = "query-log";
+        });
+#endif
+
+
+#if EFCORE_PROFILER_TOOLBAR
+        app.UseEfCoreQueryToolbar(x => x.DisableOnPaths = new [] {
+            "graphql"
+        });
+#endif
+
+#if ALTERNATIVES
+        app.UseNanoDbProfiler(x =>
+        {
+            x.ToolbarEnabled = true;
+            x.ProfilerPageUrl = "query-log";
+        });
+
+        app.UseNanoDbProfiler(x => x.ToolbarEnabled = true); 
+#endif
+
+        //app.UseDefaultFiles();
+
+        //app.UseRouting();
+
+        app.MapRazorPages();
+
+        app.MapGet("/hello", async (HttpContext h, [FromServices] TodoContext db) =>
         {
             await db.Database.EnsureCreatedAsync();
-            return Results.Text("Hello World!", "text/html");
+            return Results.Text("<div>Hello World!</div>", "text/html; charset=utf-8");
         });
 
         app.MapGet("/insert", (HttpContext h, [FromServices] TodoContext db) =>
@@ -40,6 +79,7 @@ public class Program
 
             return Results.Ok(e.Title);
         });
+
 
         app.MapGet("/select/scalar", (HttpContext h, [FromServices] TodoContext db) => Results.Ok(db.Todos.Select(x => x.Id)));
 
@@ -85,13 +125,11 @@ public class Program
             return Results.Ok();
         });
 
-        app
-            .Services
-            .CreateScope()
-            .ServiceProvider
-            .GetRequiredService<TodoContext>()
-            .Database
-            .EnsureCreated();
+        using (var scope = app.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<TodoContext>();
+            db.Database.EnsureCreated();
+        }
         
         app.Run();
     }
